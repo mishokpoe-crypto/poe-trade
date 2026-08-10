@@ -195,6 +195,9 @@
         let currentPage = 1;
         const itemsPerPage = 18;
 
+        // Укажи здесь свою ссылку на веб-приложение Google Apps Script (заканчивается на /exec)
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxpUYXZRhJVuX6p-_jDacqnYQQ8Cp0GTUcO6kglbyQ_Omdq4EGezCnUWeIc__zLwiwdFw/exec';
+
         window.onload = loadData;
 
         function escapeHtml(str) {
@@ -221,8 +224,9 @@
             document.getElementById('cardsGrid').style.display = 'none';
             document.getElementById('paginationContainer').style.display = 'none';
 
-            google.script.run
-                .withSuccessHandler(function(data) {
+            fetch(WEB_APP_URL + '?action=getData')
+                .then(response => response.json())
+                .then(data => {
                     allData = Array.isArray(data) ? data : [];
                     renderFilters(allData);
                     currentPage = 1;
@@ -230,11 +234,11 @@
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('cardsGrid').style.display = 'grid';
                 })
-                .withFailureHandler(function(error) {
+                .catch(error => {
+                    console.error('Ошибка:', error);
                     document.getElementById('loading').style.display = 'block';
-                    document.getElementById('loading').innerText = "Ошибка загрузки: " + error.message;
-                })
-                .getSheetData();
+                    document.getElementById('loading').innerText = "Ошибка загрузки данных";
+                });
         }
 
         function renderFilters(data) {
