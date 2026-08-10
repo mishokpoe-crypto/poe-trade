@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>POE 1 — Витрина аккаунтов</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --gold: #d4af37; --border-color: #3d3122; }
+        
+        body { 
+            background: radial-gradient(circle at 50% 20%, #1f1711 0%, #080605 50%, #020101 100%);
+            color: #d0d0d0; 
+            font-family: 'Open Sans', sans-serif; 
+            margin: 0; 
+            padding: 30px 20px; 
+            min-height: 100vh; 
+            background-attachment: fixed;
+        }
+        
+        .container { max-width: 1300px; margin: 0 auto; }
+        
+        .header-box { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #2d2319; padding-bottom: 15px; margin-bottom: 30px; }
+        h2 { font-family: 'Cinzel', serif; color: var(--gold); font-size: 28px; font-weight: 700; letter-spacing: 2px; margin: 0; text-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
+        
+        .btn-refresh, .btn-cart { background: linear-gradient(135deg, #1a1510, #0a0806); color: var(--gold); border: 1px solid #524330; padding: 8px 16px; border-radius: 4px; font-family: 'Cinzel', serif; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }
+        .btn-refresh:hover, .btn-cart:hover { border-color: var(--gold); background: #251d16; box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
+        
+        .filters { display: flex; justify-content: center; gap: 30px; margin-bottom: 40px; background: rgba(10, 8, 6, 0.7); padding: 18px 25px; border: 1px solid var(--border-color); border-radius: 4px; }
+        .filter-group { display: flex; align-items: center; gap: 10px; font-family: 'Cinzel', serif; font-size: 14px; color: #b8ab96; }
+        select, input { background: #050403; color: #f0e6d2; border: 1px solid #423525; padding: 6px 12px; border-radius: 3px; font-family: 'Open Sans', sans-serif; font-size: 14px; outline: none; }
+
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
+        
+        .card { 
+            background: linear-gradient(135deg, rgba(16, 13, 10, 0.95), rgba(6, 5, 4, 0.98)); 
+            border: 1px solid #3d3122; 
+            padding: 22px; 
+            border-radius: 4px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.7); 
+            box-sizing: border-box; 
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: #7a633c;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.8), 0 0 15px rgba(212, 175, 55, 0.15);
+        }
+        
+        .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #241c14; padding-bottom: 10px; margin-bottom: 15px; }
+        .card-id { color: #9c8e7a; font-family: 'Cinzel', serif; font-size: 15px; font-weight: 700; }
+        
+        .card-price { 
+            color: var(--gold); 
+            font-family: 'Cinzel', serif; 
+            font-weight: 700; 
+            font-size: 20px; 
+            text-shadow: 0 0 8px rgba(212, 175, 55, 0.4), 0 0 20px rgba(212, 175, 55, 0.2); 
+        }
+        
+        .card-title { font-family: 'Cinzel', serif; color: #e6dcce; font-size: 16px; font-weight: 600; margin-bottom: 15px; }
+        .card-info { font-size: 14px; color: #7a6e5d; margin-bottom: 8px; display: flex; justify-content: space-between; }
+        .card-info b { color: #d4af37; font-weight: bold; }
+        
+        .card-footer { margin-top: 20px; display: flex; gap: 10px; }
+        
+        .btn-action { 
+            padding: 12px; 
+            background: linear-gradient(180deg, #14100c, #0a0705); 
+            border: 1px solid #423525; 
+            color: var(--gold); 
+            cursor: pointer; 
+            font-family: 'Cinzel', serif; 
+            font-weight: 700; 
+            font-size: 14px; 
+            border-radius: 3px; 
+            flex: 1.5; 
+            transition: 0.2s; 
+            text-align: center; 
+            text-decoration: none; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            box-sizing: border-box;
+        }
+        .btn-action:hover:not(:disabled) { border-color: var(--gold); color: #fff; background: #1f1711; box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
+        .btn-action:disabled { border-color: #221c15; color: #4a4136; background: #060504; cursor: default; }
+
+        .btn-link { 
+            flex: 1; 
+            border-color: #2d2319; 
+            color: #8c806f; 
+            background: linear-gradient(180deg, #120e0b, #070504); 
+            font-size: 13px; 
+            text-decoration: none;
+        }
+        .btn-link:hover:not(:disabled) { border-color: #524330; color: #d0d0d0; background: #1a1410; box-shadow: none; }
+
+        /* Pagination Styles */
+        .pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 40px; }
+        .page-btn { background: linear-gradient(135deg, #1a1510, #0a0806); color: var(--gold); border: 1px solid #524330; padding: 8px 14px; border-radius: 4px; font-family: 'Cinzel', serif; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        .page-btn:hover:not(:disabled) { border-color: var(--gold); background: #251d16; box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
+        .page-btn:disabled { border-color: #221c15; color: #4a4136; background: #060504; cursor: default; }
+        .page-info { font-family: 'Cinzel', serif; color: #b8ab96; font-size: 14px; }
+
+        #cartModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(3px); z-index: 100; }
+        .modal-content { background: #0d0a08; width: 460px; margin: 80px auto; padding: 30px; border: 1px solid var(--border-color); color: #d0d0d0; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.9); box-sizing: border-box; }
+        
+        .modal-title { font-size: 20px; margin-top: 0; font-family: 'Cinzel', serif; color: var(--gold); border-bottom: 1px solid #241c14; padding-bottom: 12px; text-shadow: 0 0 8px rgba(212, 175, 55, 0.3); }
+        .modal-list-item { padding: 10px 0; border-bottom: 1px solid #1a1510; display: flex; justify-content: space-between; align-items: center; font-size: 15px; }
+        .modal-item-text { color: #e6dcce; font-family: 'Cinzel', serif; }
+        .modal-del-btn { color: #b85c5c; background: none; border: none; cursor: pointer; font-family: 'Cinzel', serif; font-size: 13px; font-weight: bold; }
+        .modal-del-btn:hover { color: #ff7676; }
+        .modal-empty { color: #9c8e7a; text-align: center; padding: 25px; font-size: 14px; font-family: 'Cinzel', serif; }
+
+        #cartList {
+            margin: 15px 0;
+            padding: 0;
+            list-style: none;
+            max-height: 450px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #524330 #080605;
+        }
+        #cartList::-webkit-scrollbar { width: 6px; }
+        #cartList::-webkit-scrollbar-track { background: #080605; border-radius: 3px; }
+        #cartList::-webkit-scrollbar-thumb { background: #3d3122; border-radius: 3px; }
+        #cartList::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+        .modal-action-btn { width: 100%; margin-top: 10px; background: linear-gradient(180deg, #14100c, #0a0705); border: 1px solid #423525; color: var(--gold); padding: 12px; font-family: 'Cinzel', serif; font-weight: 700; font-size: 14px; cursor: pointer; border-radius: 3px; text-align: center; transition: 0.2s; box-sizing: border-box; }
+        .modal-action-btn:hover:not(:disabled) { background: #1f1711; border-color: var(--gold); box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
+        .modal-action-btn:disabled { border-color: #221c15; color: #4a4136; background: #060504; cursor: default; }
+
+        .modal-close-btn { width: 100%; margin-top: 10px; background: linear-gradient(180deg, #14100c, #0a0705); border: 1px solid #423525; color: var(--gold); padding: 14px; font-family: 'Cinzel', serif; font-weight: 700; font-size: 15px; cursor: pointer; border-radius: 3px; text-align: center; transition: 0.2s; box-sizing: border-box; }
+        .modal-close-btn:hover { background: var(--gold); color: #000; box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header-box">
+            <h2>POE 1 — ВИТРИНА АККАУНТОВ</h2>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <a href="https://t.me/MishokPoE" target="_blank" class="btn-refresh">💬 Telegram</a>
+                <button class="btn-refresh" onclick="loadData()">🔄 Обновить</button>
+                <button class="btn-cart" onclick="toggleCart()">🛒 Корзина (<span id="cartCount">0</span>)</button>
+            </div>
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <span>Поиск ID:</span>
+                <input type="text" id="searchId" placeholder="Введите ID..." oninput="onFilterChange()">
+            </div>
+            <div class="filter-group">
+                <span>Макс. год:</span>
+                <select id="yearFilter" onchange="onFilterChange()"><option value="all">Любой</option></select>
+            </div>
+            <div class="filter-group">
+                <span>Цена:</span>
+                <select id="priceFilter" onchange="onFilterChange()">
+                    <option value="all">Любая</option>
+                    <option value="0-15">До 15$</option>
+                    <option value="20-30">20-30$</option>
+                    <option value="35-50">35-50$</option>
+                    <option value="60-9999">60$+</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="loading" style="text-align: center; color: #7a6e5d; font-family: 'Cinzel', serif; font-size: 16px; padding: 50px;">Загрузка данных...</div>
+        <div id="cardsGrid" class="cards-grid" style="display: none;"></div>
+        
+        <div id="paginationContainer" class="pagination" style="display: none;">
+            <button class="page-btn" id="prevBtn" onclick="changePage(-1)">Назад</button>
+            <span class="page-info" id="pageInfo">Страница 1 из 1</span>
+            <button class="page-btn" id="nextBtn" onclick="changePage(1)">Вперед</button>
+        </div>
+    </div>
+
+    <div id="cartModal">
+        <div class="modal-content">
+            <h3 class="modal-title">Корзина</h3>
+            <ul id="cartList"></ul>
+            <button class="modal-action-btn" id="copyCartBtn" onclick="copyCartIds()" disabled>📋 Скопировать ID</button>
+            <button class="modal-close-btn" onclick="toggleCart()">Закрыть</button>
+        </div>
+    </div>
+
+    <script>
+        let allData = [];
+        let cart = [];
+        let currentPage = 1;
+        const itemsPerPage = 18;
+
+        window.onload = loadData;
+
+        function escapeHtml(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function safeUrl(url) {
+            try {
+                const u = new URL(url, window.location.href);
+                return (u.protocol === 'http:' || u.protocol === 'https:') ? u.href : '#';
+            } catch { 
+                return '#'; 
+            }
+        }
+
+        function loadData() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('loading').innerText = "Загрузка данных...";
+            document.getElementById('cardsGrid').style.display = 'none';
+            document.getElementById('paginationContainer').style.display = 'none';
+
+            google.script.run
+                .withSuccessHandler(function(data) {
+                    allData = Array.isArray(data) ? data : [];
+                    renderFilters(allData);
+                    currentPage = 1;
+                    filterData();
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('cardsGrid').style.display = 'grid';
+                })
+                .withFailureHandler(function(error) {
+                    document.getElementById('loading').style.display = 'block';
+                    document.getElementById('loading').innerText = "Ошибка загрузки: " + error.message;
+                })
+                .getSheetData();
+        }
+
+        function renderFilters(data) {
+            let select = document.getElementById('yearFilter');
+            let currentValue = select.value;
+            
+            let years = [...new Set(data.map(item => item.year))].filter(y => y).sort((a,b) => b - a);
+            
+            let optionsHtml = '<option value="all">Любой</option>';
+            years.forEach(y => {
+                optionsHtml += `<option value="${escapeHtml(y)}">${escapeHtml(y)}</option>`;
+            });
+            select.innerHTML = optionsHtml;
+            
+            if (Array.from(select.options).some(opt => opt.value === currentValue)) {
+                select.value = currentValue;
+            } else {
+                select.value = 'all';
+            }
+        }
+
+        function toggleCart() {
+            let modal = document.getElementById('cartModal');
+            modal.style.display = (modal.style.display === 'block') ? 'none' : 'block';
+            
+            let list = document.getElementById('cartList');
+            let copyBtn = document.getElementById('copyCartBtn');
+
+            if (cart.length === 0) {
+                list.innerHTML = '<li class="modal-empty">Корзина пуста</li>';
+                copyBtn.disabled = true;
+            } else {
+                list.innerHTML = cart.map(id => `
+                    <li class="modal-list-item">
+                        <span class="modal-item-text">Аккаунт #${escapeHtml(id)}</span>
+                        <button class="modal-del-btn" data-del-id="${escapeHtml(id)}">[Удалить]</button>
+                    </li>
+                `).join('');
+
+                copyBtn.disabled = false;
+
+                list.querySelectorAll('.modal-del-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        removeFromCart(this.getAttribute('data-del-id'));
+                    });
+                });
+            }
+        }
+
+        function copyCartIds() {
+            if (cart.length === 0) return;
+            let textToCopy = cart.join('\n');
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                let copyBtn = document.getElementById('copyCartBtn');
+                let originalText = copyBtn.innerText;
+                copyBtn.innerText = '✅ Скопировано!';
+                setTimeout(() => {
+                    copyBtn.innerText = originalText;
+                }, 2000);
+            }).catch(err => {
+                console.error('Ошибка копирования: ', err);
+            });
+        }
+
+        function addToCart(id) {
+            let stringId = String(id);
+            if (!cart.includes(stringId)) {
+                cart.push(stringId);
+                document.getElementById('cartCount').innerText = cart.length;
+                filterData();
+            }
+        }
+
+        function removeFromCart(id) {
+            let stringId = String(id);
+            cart = cart.filter(item => item !== stringId);
+            document.getElementById('cartCount').innerText = cart.length;
+            filterData();
+            toggleCart(); 
+            toggleCart(); 
+        }
+
+        function onFilterChange() {
+            currentPage = 1;
+            filterData();
+        }
+
+        function changePage(direction) {
+            currentPage += direction;
+            filterData();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function filterData() {
+            let search = document.getElementById('searchId').value.toLowerCase();
+            let yFilter = document.getElementById('yearFilter').value;
+            let pFilter = document.getElementById('priceFilter').value;
+
+            let filtered = allData.filter(item => {
+                let cleanPriceStr = String(item.price || '').replace(/[^0-9.]/g, '');
+                let itemPrice = Number(cleanPriceStr);
+
+                let matchSearch = String(item.id || '').toLowerCase().includes(search);
+                let matchYear = (yFilter === 'all') || (Number(item.year) <= Number(yFilter));
+                
+                let matchPrice = true;
+                if (pFilter !== 'all') {
+                    let [min, max] = pFilter.split('-').map(Number);
+                    matchPrice = (!isNaN(itemPrice) && itemPrice >= min && itemPrice <= max);
+                }
+
+                return matchSearch && matchYear && matchPrice;
+            });
+
+            let totalPages = Math.ceil(filtered.length / itemsPerPage) || 1;
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+
+            let start = (currentPage - 1) * itemsPerPage;
+            let paginatedData = filtered.slice(start, start + itemsPerPage);
+
+            renderCards(paginatedData, filtered.length);
+        }
+
+        function renderCards(data, totalFilteredCount) {
+            let grid = document.getElementById('cardsGrid');
+            let paginationContainer = document.getElementById('paginationContainer');
+            grid.innerHTML = '';
+
+            if (data.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #7a6e5d; padding: 40px; font-family: Cinzel, serif; font-size: 14px;">Аккаунты не найдены</div>';
+                paginationContainer.style.display = 'none';
+                return;
+            }
+
+            data.forEach(item => {
+                let stringId = String(item.id);
+                let isInCart = cart.includes(stringId);
+
+                let card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div>
+                        <div class="card-header">
+                            <span class="card-id">#${escapeHtml(item.id)}</span>
+                            <span class="card-price">${escapeHtml(item.price !== "" && item.price !== null ? item.price : '—')}</span>
+                        </div>
+                        <div class="card-title"></div>
+                        <div class="card-info">Паки: <b>${escapeHtml(item.packs !== "" && item.packs !== null ? item.packs : '0')}</b></div>
+                        <div class="card-info">Год регистрации: <span>${escapeHtml(item.year || '—')}</span></div>
+                        <div class="card-info">Последний запуск: <span>${escapeHtml(item.lastLaunch || '—')}</span></div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn-action buy-btn" data-id="${escapeHtml(stringId)}" ${isInCart ? 'disabled' : ''}>
+                            ${isInCart ? 'В корзине' : 'Купить'}
+                        </button>
+                        ${item.screenshots ? `<a href="${safeUrl(item.screenshots)}" target="_blank" class="btn-action btn-link">Скрины</a>` : '<button class="btn-action btn-link" disabled style="opacity: 0.4;">Нет скринов</button>'}
+                    </div>
+                `;
+
+                card.querySelector('.card-title').textContent = item.character || '';
+
+                let buyBtn = card.querySelector('.buy-btn');
+                if (!isInCart) {
+                    buyBtn.addEventListener('click', function() {
+                        addToCart(this.getAttribute('data-id'));
+                    });
+                }
+
+                grid.appendChild(card);
+            });
+
+            let totalPages = Math.ceil(totalFilteredCount / itemsPerPage) || 1;
+            if (totalPages > 1) {
+                paginationContainer.style.display = 'flex';
+                document.getElementById('pageInfo').innerText = `Страница ${currentPage} из ${totalPages}`;
+                document.getElementById('prevBtn').disabled = (currentPage === 1);
+                document.getElementById('nextBtn').disabled = (currentPage === totalPages);
+            } else {
+                paginationContainer.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
