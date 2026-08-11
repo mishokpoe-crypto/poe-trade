@@ -99,7 +99,6 @@
         }
         .btn-link:hover:not(:disabled) { border-color: #524330; color: #d0d0d0; background: #1a1410; box-shadow: none; }
 
-        /* Pagination Styles */
         .pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 40px; }
         .page-btn { background: linear-gradient(135deg, #1a1510, #0a0806); color: var(--gold); border: 1px solid #524330; padding: 8px 14px; border-radius: 4px; font-family: 'Cinzel', serif; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; }
         .page-btn:hover:not(:disabled) { border-color: var(--gold); background: #251d16; box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
@@ -112,15 +111,19 @@
         .modal-title { font-size: 20px; margin-top: 0; font-family: 'Cinzel', serif; color: var(--gold); border-bottom: 1px solid #241c14; padding-bottom: 12px; text-shadow: 0 0 8px rgba(212, 175, 55, 0.3); }
         .modal-list-item { padding: 10px 0; border-bottom: 1px solid #1a1510; display: flex; justify-content: space-between; align-items: center; font-size: 15px; }
         .modal-item-text { color: #e6dcce; font-family: 'Cinzel', serif; }
-        .modal-del-btn { color: #b85c5c; background: none; border: none; cursor: pointer; font-family: 'Cinzel', serif; font-size: 13px; font-weight: bold; }
+        .modal-item-price { color: var(--gold); font-family: 'Cinzel', serif; font-size: 14px; font-weight: 600; margin-left: 10px; }
+        .modal-del-btn { color: #b85c5c; background: none; border: none; cursor: pointer; font-family: 'Cinzel', serif; font-size: 13px; font-weight: bold; margin-left: 15px; }
         .modal-del-btn:hover { color: #ff7676; }
         .modal-empty { color: #9c8e7a; text-align: center; padding: 25px; font-size: 14px; font-family: 'Cinzel', serif; }
+
+        .modal-total { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #241c14; font-family: 'Cinzel', serif; font-size: 16px; color: #b8ab96; }
+        .modal-total-price { color: var(--gold); font-weight: 700; font-size: 18px; text-shadow: 0 0 8px rgba(212, 175, 55, 0.3); }
 
         #cartList {
             margin: 15px 0;
             padding: 0;
             list-style: none;
-            max-height: 450px;
+            max-height: 400px;
             overflow-y: auto;
             scrollbar-width: thin;
             scrollbar-color: #524330 #080605;
@@ -163,13 +166,13 @@
                 <span>Цена:</span>
                 <select id="priceFilter" onchange="onFilterChange()">
                     <option value="all">Любая</option>
-                    <option value="0-15">До 15$</option>
+                    <option value="0-5">До 5$</option>
+                    <option value="8-15">8-15$</option>
                     <option value="20-30">20-30$</option>
                     <option value="35-50">35-50$</option>
                     <option value="60-9999">60$+</option>
                 </select>
             </div>
-            <!-- Добавленный фильтр «Только с паками» -->
             <div class="filter-group">
                 <input type="checkbox" id="packFilter" onchange="onFilterChange()">
                 <span>Только с паками</span>
@@ -190,6 +193,10 @@
         <div class="modal-content">
             <h3 class="modal-title">Корзина</h3>
             <ul id="cartList"></ul>
+            <div id="cartTotalContainer" class="modal-total" style="display: none;">
+                <span>Итого:</span>
+                <span id="cartTotalPrice" class="modal-total-price">0</span>
+            </div>
             <button class="modal-action-btn" id="copyCartBtn" onclick="copyCartIds()" disabled>📋 Скопировать ID</button>
             <button class="modal-close-btn" onclick="toggleCart()">Закрыть</button>
         </div>
@@ -271,18 +278,40 @@
             
             let list = document.getElementById('cartList');
             let copyBtn = document.getElementById('copyCartBtn');
+            let totalContainer = document.getElementById('cartTotalContainer');
+            let totalPriceEl = document.getElementById('cartTotalPrice');
 
             if (cart.length === 0) {
                 list.innerHTML = '<li class="modal-empty">Корзина пуста</li>';
+                totalContainer.style.display = 'none';
                 copyBtn.disabled = true;
             } else {
-                list.innerHTML = cart.map(id => `
-                    <li class="modal-list-item">
-                        <span class="modal-item-text">Аккаунт #${escapeHtml(id)}</span>
-                        <button class="modal-del-btn" data-del-id="${escapeHtml(id)}">[Удалить]</button>
-                    </li>
-                `).join('');
+                let totalPrice = 0;
 
+                list.innerHTML = cart.map(id => {
+                    let item = allData.find(i => String(i.id) === String(id));
+                    let itemPriceStr = item && item.price !== "" && item.price != null ? String(item.price) : '—';
+                    
+                    if (item && item.price !== "" && item.price != null) {
+                        let cleanNum = Number(String(item.price).replace(/[^0-9.]/g, ''));
+                        if (!isNaN(cleanNum)) totalPrice += cleanNum;
+                    }
+
+                    return `
+                        <li class="modal-list-item">
+                            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                                <span class="modal-item-text">Аккаунт #${escapeHtml(id)}</span>
+                                <div style="display: flex; align-items: center;">
+                                    <span class="modal-item-price">${escapeHtml(itemPriceStr)}</span>
+                                    <button class="modal-del-btn" data-del-id="${escapeHtml(id)}">[Удалить]</button>
+                                </div>
+                            </div>
+                        </li>
+                    `;
+                }).join('');
+
+                totalPriceEl.innerText = totalPrice > 0 ? totalPrice + ' $' : '—';
+                totalContainer.style.display = 'flex';
                 copyBtn.disabled = false;
 
                 list.querySelectorAll('.modal-del-btn').forEach(btn => {
@@ -341,7 +370,7 @@
             let search = document.getElementById('searchId').value.toLowerCase();
             let yFilter = document.getElementById('yearFilter').value;
             let pFilter = document.getElementById('priceFilter').value;
-            let onlyPacks = document.getElementById('packFilter').checked; // Фильтр паков
+            let onlyPacks = document.getElementById('packFilter').checked;
 
             let filtered = allData.filter(item => {
                 let cleanPriceStr = String(item.price || '').replace(/[^0-9.]/g, '');
@@ -356,16 +385,13 @@
                     matchPrice = (!isNaN(itemPrice) && itemPrice >= min && itemPrice <= max);
                 }
 
-                // Условие для паков (> 0)
                 let matchPacks = onlyPacks ? (Number(item.packs || 0) > 0) : true;
 
                 return matchSearch && matchYear && matchPrice && matchPacks;
             });
 
             let totalPages = Math.ceil(filtered.length / itemsPerPage) || 1;
-            if (currentPage > totalPages) {
-                currentPage = totalPages;
-            }
+            if (currentPage > totalPages) currentPage = totalPages;
 
             let start = (currentPage - 1) * itemsPerPage;
             let paginatedData = filtered.slice(start, start + itemsPerPage);
