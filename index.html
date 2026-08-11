@@ -202,262 +202,266 @@
         </div>
     </div>
 
-    <script>
-        let allData = [];
-        let cart = [];
-        let currentPage = 1;
-        const itemsPerPage = 18;
+<script>
+    let allData = [];
+    let cart = [];
+    let currentPage = 1;
+    const itemsPerPage = 18;
 
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxpUYXZRhJVuX6p-_jDacqnYQQ8Cp0GTUcO6kglbyQ_Omdq4EGezCnUWeIc__zLwiwdFw/exec';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxpUYXZRhJVuX6p-_jDacqnYQQ8Cp0GTUcO6kglbyQ_Omdq4EGezCnUWeIc__zLwiwdFw/exec';
 
-        window.onload = loadData;
+    window.onload = loadData;
 
-        function escapeHtml(str) {
-            return String(str ?? '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
+    function escapeHtml(str) {
+        return String(str ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function safeUrl(url) {
+        try {
+            const u = new URL(url, window.location.href);
+            return (u.protocol === 'http:' || u.protocol === 'https:') ? u.href : '#';
+        } catch { 
+            return '#'; 
         }
+    }
 
-        function safeUrl(url) {
-            try {
-                const u = new URL(url, window.location.href);
-                return (u.protocol === 'http:' || u.protocol === 'https:') ? u.href : '#';
-            } catch { 
-                return '#'; 
-            }
-        }
+    function loadData() {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('loading').innerText = "Загрузка данных...";
+        document.getElementById('cardsGrid').style.display = 'none';
+        document.getElementById('paginationContainer').style.display = 'none';
 
-        function loadData() {
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('loading').innerText = "Загрузка данных...";
-            document.getElementById('cardsGrid').style.display = 'none';
-            document.getElementById('paginationContainer').style.display = 'none';
-
-            fetch(WEB_APP_URL + '?action=getData')
-                .then(response => response.json())
-                .then(data => {
-                    allData = Array.isArray(data) ? data : [];
-                    renderFilters(allData);
-                    currentPage = 1;
-                    filterData();
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('cardsGrid').style.display = 'grid';
-                })
-                .catch(error => {
-                    console.error('Ошибка:', error);
-                    document.getElementById('loading').style.display = 'block';
-                    document.getElementById('loading').innerText = "Ошибка загрузки данных";
-                });
-        }
-
-        function renderFilters(data) {
-            let select = document.getElementById('yearFilter');
-            let currentValue = select.value;
-            
-            let years = [...new Set(data.map(item => item.year))].filter(y => y).sort((a,b) => b - a);
-            
-            let optionsHtml = '<option value="all">Любой</option>';
-            years.forEach(y => {
-                optionsHtml += `<option value="${escapeHtml(y)}">${escapeHtml(y)}</option>`;
-            });
-            select.innerHTML = optionsHtml;
-            
-            if (Array.from(select.options).some(opt => opt.value === currentValue)) {
-                select.value = currentValue;
-            } else {
-                select.value = 'all';
-            }
-        }
-
-        function toggleCart() {
-            let modal = document.getElementById('cartModal');
-            modal.style.display = (modal.style.display === 'block') ? 'none' : 'block';
-            
-            let list = document.getElementById('cartList');
-            let copyBtn = document.getElementById('copyCartBtn');
-            let totalContainer = document.getElementById('cartTotalContainer');
-            let totalPriceEl = document.getElementById('cartTotalPrice');
-
-            if (cart.length === 0) {
-                list.innerHTML = '<li class="modal-empty">Корзина пуста</li>';
-                totalContainer.style.display = 'none';
-                copyBtn.disabled = true;
-            } else {
-                let totalPrice = 0;
-
-                list.innerHTML = cart.map(id => {
-                    let item = allData.find(i => String(i.id) === String(id));
-                    let itemPriceStr = item && item.price !== "" && item.price != null ? String(item.price) : '—';
-                    
-                    if (item && item.price !== "" && item.price != null) {
-                        let cleanNum = Number(String(item.price).replace(/[^0-9.]/g, ''));
-                        if (!isNaN(cleanNum)) totalPrice += cleanNum;
-                    }
-
-                    return `
-                        <li class="modal-list-item">
-                            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                                <span class="modal-item-text">Аккаунт #${escapeHtml(id)}</span>
-                                <div style="display: flex; align-items: center;">
-                                    <span class="modal-item-price">${escapeHtml(itemPriceStr)}</span>
-                                    <button class="modal-del-btn" data-del-id="${escapeHtml(id)}">[Удалить]</button>
-                                </div>
-                            </div>
-                        </li>
-                    `;
-                }).join('');
-
-                totalPriceEl.innerText = totalPrice > 0 ? totalPrice + ' $' : '—';
-                totalContainer.style.display = 'flex';
-                copyBtn.disabled = false;
-
-                list.querySelectorAll('.modal-del-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        removeFromCart(this.getAttribute('data-del-id'));
-                    });
-                });
-            }
-        }
-
-        function copyCartIds() {
-            if (cart.length === 0) return;
-            let textToCopy = cart.join('\n');
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                let copyBtn = document.getElementById('copyCartBtn');
-                let originalText = copyBtn.innerText;
-                copyBtn.innerText = '✅ Скопировано!';
-                setTimeout(() => {
-                    copyBtn.innerText = originalText;
-                }, 2000);
-            }).catch(err => {
-                console.error('Ошибка копирования: ', err);
-            });
-        }
-
-        function addToCart(id) {
-            let stringId = String(id);
-            if (!cart.includes(stringId)) {
-                cart.push(stringId);
-                document.getElementById('cartCount').innerText = cart.length;
+        fetch(WEB_APP_URL + '?action=getData')
+            .then(response => response.json())
+            .then(data => {
+                allData = Array.isArray(data) ? data : [];
+                renderFilters(allData);
+                currentPage = 1;
                 filterData();
-            }
-        }
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('cardsGrid').style.display = 'grid';
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('loading').innerText = "Ошибка загрузки данных";
+            });
+    }
 
-        function removeFromCart(id) {
-            let stringId = String(id);
-            cart = cart.filter(item => item !== stringId);
+    function renderFilters(data) {
+        let select = document.getElementById('yearFilter');
+        let currentValue = select.value;
+        
+        // Очищаем пробелы, оставляем исходный вид и убираем дубли
+        let years = [...new Set(
+            data.map(item => String(item.year || '').trim()).filter(y => y !== '')
+        )].sort((a, b) => Number(b) - Number(a));
+        
+        let optionsHtml = '<option value="all">Любой</option>';
+        years.forEach(y => {
+            optionsHtml += `<option value="${escapeHtml(y)}">${escapeHtml(y)}</option>`;
+        });
+        select.innerHTML = optionsHtml;
+        
+        if (Array.from(select.options).some(opt => opt.value === currentValue)) {
+            select.value = currentValue;
+        } else {
+            select.value = 'all';
+        }
+    }
+
+    function toggleCart() {
+        let modal = document.getElementById('cartModal');
+        modal.style.display = (modal.style.display === 'block') ? 'none' : 'block';
+        
+        let list = document.getElementById('cartList');
+        let copyBtn = document.getElementById('copyCartBtn');
+        let totalContainer = document.getElementById('cartTotalContainer');
+        let totalPriceEl = document.getElementById('cartTotalPrice');
+
+        if (cart.length === 0) {
+            list.innerHTML = '<li class="modal-empty">Корзина пуста</li>';
+            totalContainer.style.display = 'none';
+            copyBtn.disabled = true;
+        } else {
+            let totalPrice = 0;
+
+            list.innerHTML = cart.map(id => {
+                let item = allData.find(i => String(i.id) === String(id));
+                let itemPriceStr = item && item.price !== "" && item.price != null ? String(item.price) : '—';
+                
+                if (item && item.price !== "" && item.price != null) {
+                    let cleanNum = Number(String(item.price).replace(/[^0-9.]/g, ''));
+                    if (!isNaN(cleanNum)) totalPrice += cleanNum;
+                }
+
+                return `
+                    <li class="modal-list-item">
+                        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                            <span class="modal-item-text">Аккаунт #${escapeHtml(id)}</span>
+                            <div style="display: flex; align-items: center;">
+                                <span class="modal-item-price">${escapeHtml(itemPriceStr)}</span>
+                                <button class="modal-del-btn" data-del-id="${escapeHtml(id)}">[Удалить]</button>
+                            </div>
+                        </div>
+                    </li>
+                `;
+            }).join('');
+
+            totalPriceEl.innerText = totalPrice > 0 ? totalPrice + ' $' : '—';
+            totalContainer.style.display = 'flex';
+            copyBtn.disabled = false;
+
+            list.querySelectorAll('.modal-del-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    removeFromCart(this.getAttribute('data-del-id'));
+                });
+            });
+        }
+    }
+
+    function copyCartIds() {
+        if (cart.length === 0) return;
+        let textToCopy = cart.join('\n');
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            let copyBtn = document.getElementById('copyCartBtn');
+            let originalText = copyBtn.innerText;
+            copyBtn.innerText = '✅ Скопировано!';
+            setTimeout(() => {
+                copyBtn.innerText = originalText;
+            }, 2000);
+        }).catch(err => {
+            console.error('Ошибка копирования: ', err);
+        });
+    }
+
+    function addToCart(id) {
+        let stringId = String(id);
+        if (!cart.includes(stringId)) {
+            cart.push(stringId);
             document.getElementById('cartCount').innerText = cart.length;
             filterData();
-            toggleCart(); 
-            toggleCart(); 
         }
+    }
 
-        function onFilterChange() {
-            currentPage = 1;
-            filterData();
-        }
+    function removeFromCart(id) {
+        let stringId = String(id);
+        cart = cart.filter(item => item !== stringId);
+        document.getElementById('cartCount').innerText = cart.length;
+        filterData();
+        toggleCart(); 
+        toggleCart(); 
+    }
 
-        function changePage(direction) {
-            currentPage += direction;
-            filterData();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+    function onFilterChange() {
+        currentPage = 1;
+        filterData();
+    }
 
-        function filterData() {
-            let search = document.getElementById('searchId').value.toLowerCase();
-            let yFilter = document.getElementById('yearFilter').value;
-            let pFilter = document.getElementById('priceFilter').value;
-            let onlyPacks = document.getElementById('packFilter').checked;
+    function changePage(direction) {
+        currentPage += direction;
+        filterData();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-            let filtered = allData.filter(item => {
-                let cleanPriceStr = String(item.price || '').replace(/[^0-9.]/g, '');
-                let itemPrice = Number(cleanPriceStr);
+    function filterData() {
+        let search = document.getElementById('searchId').value.toLowerCase();
+        let yFilter = document.getElementById('yearFilter').value;
+        let pFilter = document.getElementById('priceFilter').value;
+        let onlyPacks = document.getElementById('packFilter').checked;
 
-                let matchSearch = String(item.id || '').toLowerCase().includes(search);
-                let matchYear = (yFilter === 'all') || (Number(item.year) <= Number(yFilter));
-                
-                let matchPrice = true;
-                if (pFilter !== 'all') {
-                    let [min, max] = pFilter.split('-').map(Number);
-                    matchPrice = (!isNaN(itemPrice) && itemPrice >= min && itemPrice <= max);
-                }
+        let filtered = allData.filter(item => {
+            let cleanPriceStr = String(item.price || '').replace(/[^0-9.]/g, '');
+            let itemPrice = Number(cleanPriceStr);
+            let itemYearStr = String(item.year || '').trim();
 
-                let matchPacks = onlyPacks ? (Number(item.packs || 0) > 0) : true;
-
-                return matchSearch && matchYear && matchPrice && matchPacks;
-            });
-
-            let totalPages = Math.ceil(filtered.length / itemsPerPage) || 1;
-            if (currentPage > totalPages) currentPage = totalPages;
-
-            let start = (currentPage - 1) * itemsPerPage;
-            let paginatedData = filtered.slice(start, start + itemsPerPage);
-
-            renderCards(paginatedData, filtered.length);
-        }
-
-        function renderCards(data, totalFilteredCount) {
-            let grid = document.getElementById('cardsGrid');
-            let paginationContainer = document.getElementById('paginationContainer');
-            grid.innerHTML = '';
-
-            if (data.length === 0) {
-                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #7a6e5d; padding: 40px; font-family: Cinzel, serif; font-size: 14px;">Аккаунты не найдены</div>';
-                paginationContainer.style.display = 'none';
-                return;
+            let matchSearch = String(item.id || '').toLowerCase().includes(search);
+            let matchYear = (yFilter === 'all') || (itemYearStr !== '' && Number(itemYearStr) <= Number(yFilter));
+            
+            let matchPrice = true;
+            if (pFilter !== 'all') {
+                let [min, max] = pFilter.split('-').map(Number);
+                matchPrice = (!isNaN(itemPrice) && itemPrice >= min && itemPrice <= max);
             }
 
-            data.forEach(item => {
-                let stringId = String(item.id);
-                let isInCart = cart.includes(stringId);
+            let matchPacks = onlyPacks ? (Number(item.packs || 0) > 0) : true;
 
-                let card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <div>
-                        <div class="card-header">
-                            <span class="card-id">#${escapeHtml(item.id)}</span>
-                            <span class="card-price">${escapeHtml(item.price !== "" && item.price !== null ? item.price : '—')}</span>
-                        </div>
-                        <div class="card-title"></div>
-                        <div class="card-info">Паки: <b>${escapeHtml(item.packs !== "" && item.packs !== null ? item.packs : '0')}</b></div>
-                        <div class="card-info">Монеты: <b>${escapeHtml(item.coins !== "" && item.coins !== null ? item.coins : '0')}</b></div>
-                        <div class="card-info">Год регистрации: <span>${escapeHtml(item.year || '—')}</span></div>
-                        <div class="card-info">Последний запуск: <span>${escapeHtml(item.lastLaunch || '—')}</span></div>
-                    </div>
-                    <div class="card-footer">
-                        <button class="btn-action buy-btn" data-id="${escapeHtml(stringId)}" ${isInCart ? 'disabled' : ''}>
-                            ${isInCart ? 'В корзине' : 'Купить'}
-                        </button>
-                        ${item.screenshots ? `<a href="${safeUrl(item.screenshots)}" target="_blank" class="btn-action btn-link">Скрины</a>` : '<button class="btn-action btn-link" disabled style="opacity: 0.4;">Нет скринов</button>'}
-                    </div>
-                `;
+            return matchSearch && matchYear && matchPrice && matchPacks;
+        });
 
-                card.querySelector('.card-title').textContent = item.character || '';
+        let totalPages = Math.ceil(filtered.length / itemsPerPage) || 1;
+        if (currentPage > totalPages) currentPage = totalPages;
 
-                let buyBtn = card.querySelector('.buy-btn');
-                if (!isInCart) {
-                    buyBtn.addEventListener('click', function() {
-                        addToCart(this.getAttribute('data-id'));
-                    });
-                }
+        let start = (currentPage - 1) * itemsPerPage;
+        let paginatedData = filtered.slice(start, start + itemsPerPage);
 
-                grid.appendChild(card);
-            });
+        renderCards(paginatedData, filtered.length);
+    }
 
-            let totalPages = Math.ceil(totalFilteredCount / itemsPerPage) || 1;
-            if (totalPages > 1) {
-                paginationContainer.style.display = 'flex';
-                document.getElementById('pageInfo').innerText = `Страница ${currentPage} из ${totalPages}`;
-                document.getElementById('prevBtn').disabled = (currentPage === 1);
-                document.getElementById('nextBtn').disabled = (currentPage === totalPages);
-            } else {
-                paginationContainer.style.display = 'none';
-            }
+    function renderCards(data, totalFilteredCount) {
+        let grid = document.getElementById('cardsGrid');
+        let paginationContainer = document.getElementById('paginationContainer');
+        grid.innerHTML = '';
+
+        if (data.length === 0) {
+            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #7a6e5d; padding: 40px; font-family: Cinzel, serif; font-size: 14px;">Аккаунты не найдены</div>';
+            paginationContainer.style.display = 'none';
+            return;
         }
-    </script>
+
+        data.forEach(item => {
+            let stringId = String(item.id);
+            let isInCart = cart.includes(stringId);
+
+            let card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div>
+                    <div class="card-header">
+                        <span class="card-id">#${escapeHtml(item.id)}</span>
+                        <span class="card-price">${escapeHtml(item.price !== "" && item.price !== null ? item.price : '—')}</span>
+                    </div>
+                    <div class="card-title"></div>
+                    <div class="card-info">Паки: <b>${escapeHtml(item.packs !== "" && item.packs !== null ? item.packs : '0')}</b></div>
+                    <div class="card-info">Монеты: <b>${escapeHtml(item.coins !== "" && item.coins !== null ? item.coins : '0')}</b></div>
+                    <div class="card-info">Год регистрации: <span>${escapeHtml(item.year || '—')}</span></div>
+                    <div class="card-info">Последний запуск: <span>${escapeHtml(item.lastLaunch || '—')}</span></div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn-action buy-btn" data-id="${escapeHtml(stringId)}" ${isInCart ? 'disabled' : ''}>
+                        ${isInCart ? 'В корзине' : 'Купить'}
+                    </button>
+                    ${item.screenshots ? `<a href="${safeUrl(item.screenshots)}" target="_blank" class="btn-action btn-link">Скрины</a>` : '<button class="btn-action btn-link" disabled style="opacity: 0.4;">Нет скринов</button>'}
+                </div>
+            `;
+
+            card.querySelector('.card-title').textContent = item.character || '';
+
+            let buyBtn = card.querySelector('.buy-btn');
+            if (!isInCart) {
+                buyBtn.addEventListener('click', function() {
+                    addToCart(this.getAttribute('data-id'));
+                });
+            }
+
+            grid.appendChild(card);
+        });
+
+        let totalPages = Math.ceil(totalFilteredCount / itemsPerPage) || 1;
+        if (totalPages > 1) {
+            paginationContainer.style.display = 'flex';
+            document.getElementById('pageInfo').innerText = `Страница ${currentPage} из ${totalPages}`;
+            document.getElementById('prevBtn').disabled = (currentPage === 1);
+            document.getElementById('nextBtn').disabled = (currentPage === totalPages);
+        } else {
+            paginationContainer.style.display = 'none';
+        }
+    }
+</script>
 </body>
 </html>
