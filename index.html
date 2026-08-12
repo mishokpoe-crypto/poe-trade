@@ -426,6 +426,10 @@
 
             let card = document.createElement('div');
             card.className = 'card';
+            
+            let packsVal = (item.packs !== "" && item.packs !== null && item.packs !== undefined) ? item.packs : '?';
+            let coinsVal = (item.coins !== "" && item.coins !== null && item.coins !== undefined) ? item.coins : '?';
+
             card.innerHTML = `
                 <div>
                     <div class="card-header">
@@ -433,8 +437,8 @@
                         <span class="card-price">${escapeHtml(item.price !== "" && item.price !== null ? item.price + ' $' : '—')}</span>
                     </div>
                     <div class="card-title"></div>
-                    <div class="card-info">Паки: <b>${escapeHtml(item.packs !== "" && item.packs !== null ? item.packs : '0')}</b></div>
-                    <div class="card-info">Монеты: <b>${escapeHtml(item.coins !== "" && item.coins !== null ? item.coins : '0')}</b></div>
+                    <div class="card-info">Паки: <b>${escapeHtml(packsVal)}</b></div>
+                    <div class="card-info">Монеты: <b>${escapeHtml(coinsVal)}</b></div>
                     <div class="card-info">Год регистрации: <span>${escapeHtml(item.year || '—')}</span></div>
                     <div class="card-info">Последний запуск: <span>${escapeHtml(item.lastLaunch || '—')}</span></div>
                 </div>
