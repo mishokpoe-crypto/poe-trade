@@ -375,6 +375,13 @@
         let onlyPacks = document.getElementById('packFilter').checked;
 
         let filtered = allData.filter(item => {
+            // Проверка: есть ли хотя бы одно заполненное поле помимо ID
+            const hasOtherFields = ['price', 'character', 'packs', 'coins', 'year', 'lastLaunch', 'screenshots']
+                .some(key => item[key] !== undefined && item[key] !== null && String(item[key]).trim() !== '');
+
+            // Если заполнено только ID (а всё остальное пустое) — пропускаем этот аккаунт
+            if (!hasOtherFields) return false;
+
             let cleanPriceStr = String(item.price || '').replace(/[^0-9.]/g, '');
             let itemPrice = Number(cleanPriceStr);
             let itemYearStr = String(item.year || '').trim();
