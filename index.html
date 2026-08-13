@@ -198,6 +198,10 @@
                 <input type="text" id="searchId" placeholder="Введите ID..." oninput="onFilterChange()">
             </div>
             <div class="filter-group">
+                <span>Описание:</span>
+                <input type="text" id="searchChar" placeholder="Лвл / стеш..." oninput="onFilterChange()">
+            </div>
+            <div class="filter-group">
                 <span>Макс. год:</span>
                 <select id="yearFilter" onchange="onFilterChange()"><option value="all">Любой</option></select>
             </div>
@@ -214,7 +218,11 @@
             </div>
             <div class="filter-group">
                 <input type="checkbox" id="packFilter" onchange="onFilterChange()">
-                <span>Только с паками</span>
+                <span>Паки</span>
+            </div>
+            <div class="filter-group">
+                <input type="checkbox" id="coinFilter" onchange="onFilterChange()">
+                <span>Монеты</span>
             </div>
         </div>
 
@@ -420,10 +428,12 @@
     }
 
     function filterData() {
-        let search = document.getElementById('searchId').value.toLowerCase();
+        let searchId = document.getElementById('searchId').value.trim().toLowerCase();
+        let searchChar = document.getElementById('searchChar').value.trim().toLowerCase();
         let yFilter = document.getElementById('yearFilter').value;
         let pFilter = document.getElementById('priceFilter').value;
         let onlyPacks = document.getElementById('packFilter').checked;
+        let onlyCoins = document.getElementById('coinFilter').checked;
 
         let filtered = allData.filter(item => {
             const hasOtherFields = ['price', 'character', 'packs', 'coins', 'year', 'lastLaunch', 'screenshots']
@@ -435,7 +445,8 @@
             let itemPrice = Number(cleanPriceStr);
             let itemYearStr = String(item.year || '').trim();
 
-            let matchSearch = String(item.id || '').toLowerCase().includes(search);
+            let matchId = String(item.id || '').toLowerCase().includes(searchId);
+            let matchChar = String(item.character || '').toLowerCase().includes(searchChar);
             let matchYear = (yFilter === 'all') || (itemYearStr !== '' && Number(itemYearStr) <= Number(yFilter));
             
             let matchPrice = true;
@@ -445,8 +456,9 @@
             }
 
             let matchPacks = onlyPacks ? (Number(item.packs || 0) > 0) : true;
+            let matchCoins = onlyCoins ? (Number(item.coins || 0) > 0) : true;
 
-            return matchSearch && matchYear && matchPrice && matchPacks;
+            return matchId && matchChar && matchYear && matchPrice && matchPacks && matchCoins;
         });
 
         let totalPages = Math.ceil(filtered.length / itemsPerPage) || 1;
