@@ -3,6 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>POE 1 — Витрина аккаунтов</title>
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SZRFLJDEF1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-SZRFLJDEF1');
+    </script>
+
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #d4af37; --border-color: #3d3122; }
@@ -207,7 +218,7 @@
             </div>
         </div>
 
-        <!-- Обновленный контейнер загрузки со спиннером -->
+        <!-- Контейнер загрузки со спиннером -->
         <div id="loading" class="loading-container">
             <div class="spinner" id="loadingSpinner"></div>
             <span id="loadingText">Загрузка данных...</span>
@@ -288,7 +299,7 @@
             .catch(error => {
                 console.error('Ошибка:', error);
                 loadingBox.style.display = 'flex';
-                spinner.style.display = 'none'; // Скрываем кружок при ошибке
+                spinner.style.display = 'none';
                 loadingText.innerText = "Ошибка загрузки данных";
             });
     }
