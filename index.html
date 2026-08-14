@@ -36,12 +36,108 @@
         .btn-refresh, .btn-cart { background: linear-gradient(135deg, #1a1510, #0a0806); color: var(--gold); border: 1px solid #524330; padding: 8px 16px; border-radius: 4px; font-family: 'Cinzel', serif; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }
         .btn-refresh:hover, .btn-cart:hover { border-color: var(--gold); background: #251d16; box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
         
-        .filters { display: flex; justify-content: center; gap: 30px; margin-bottom: 40px; background: rgba(10, 8, 6, 0.7); padding: 18px 25px; border: 1px solid var(--border-color); border-radius: 4px; flex-wrap: wrap; align-items: center; }
-        .filter-group { display: flex; align-items: center; gap: 10px; font-family: 'Cinzel', serif; font-size: 14px; color: #b8ab96; }
-        select, input[type="text"] { background: #050403; color: #f0e6d2; border: 1px solid #423525; padding: 6px 12px; border-radius: 3px; font-family: 'Open Sans', sans-serif; font-size: 14px; outline: none; }
-        input[type="checkbox"] { accent-color: var(--gold); width: 16px; height: 16px; cursor: pointer; }
+        /* Сетка фильтров: 6 ровных колонок */
+        .filters { 
+            display: grid;
+            grid-template-columns: repeat(6, 1fr); 
+            gap: 15px 16px;
+            align-items: end;
+            margin-bottom: 40px; 
+            background: rgba(10, 8, 6, 0.85); 
+            padding: 20px 25px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 6px;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5), 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
 
-        /* Стиль блока загрузки и анимация кружка */
+        .filter-group { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 6px; 
+            font-family: 'Cinzel', serif; 
+            font-size: 13px; 
+            color: #b8ab96; 
+        }
+
+        .filter-group label {
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            white-space: nowrap;
+        }
+
+        select, input[type="text"] { 
+            background: #050403; 
+            color: #f0e6d2; 
+            border: 1px solid #423525; 
+            padding: 8px 10px; 
+            border-radius: 4px; 
+            font-family: 'Open Sans', sans-serif; 
+            font-size: 13px; 
+            outline: none; 
+            width: 100%;
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        select:focus, input[type="text"]:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 8px rgba(212, 175, 55, 0.25);
+        }
+
+        /* Компактная верстка чекбоксов друг под другом */
+        .filter-checkboxes {
+            grid-column: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 6px;
+            height: 38px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-size: 12px;
+            color: #b8ab96;
+            user-select: none;
+            transition: color 0.2s;
+            white-space: nowrap;
+        }
+
+        .checkbox-label:hover {
+            color: var(--gold);
+        }
+
+        input[type="checkbox"] { 
+            accent-color: var(--gold); 
+            width: 15px; 
+            height: 15px; 
+            cursor: pointer; 
+            margin: 0;
+        }
+
+        /* Адаптив для средних и маленьких экранов */
+        @media (max-width: 1100px) {
+            .filters {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 650px) {
+            .filters {
+                grid-template-columns: 1fr;
+            }
+            .filter-checkboxes {
+                flex-direction: row;
+                gap: 20px;
+                height: auto;
+                margin-top: 5px;
+            }
+        }
+
         .loading-container { 
             display: flex; 
             flex-direction: column; 
@@ -194,19 +290,22 @@
 
         <div class="filters">
             <div class="filter-group">
-                <span>Поиск ID:</span>
+                <label for="searchId">Поиск ID:</label>
                 <input type="text" id="searchId" placeholder="Введите ID..." oninput="onFilterChange()">
             </div>
+            
             <div class="filter-group">
-                <span>Описание:</span>
+                <label for="searchChar">Описание:</label>
                 <input type="text" id="searchChar" placeholder="Лвл / стеш..." oninput="onFilterChange()">
             </div>
+            
             <div class="filter-group">
-                <span>Макс. год:</span>
+                <label for="yearFilter">Макс. год:</label>
                 <select id="yearFilter" onchange="onFilterChange()"><option value="all">Любой</option></select>
             </div>
+            
             <div class="filter-group">
-                <span>Цена:</span>
+                <label for="priceFilter">Диапазон цен:</label>
                 <select id="priceFilter" onchange="onFilterChange()">
                     <option value="all">Любая</option>
                     <option value="0-6">До 6$</option>
@@ -216,17 +315,29 @@
                     <option value="60-9999">60$+</option>
                 </select>
             </div>
+
             <div class="filter-group">
-                <input type="checkbox" id="packFilter" onchange="onFilterChange()">
-                <span>Паки</span>
+                <label for="sortFilter">Сортировка:</label>
+                <select id="sortFilter" onchange="onFilterChange()">
+                    <option value="newest">Сначала новые</option>
+                    <option value="oldest">Сначала старые</option>
+                    <option value="price_asc">Сначала дешевле</option>
+                    <option value="price_desc">Сначала дороже</option>
+                </select>
             </div>
-            <div class="filter-group">
-                <input type="checkbox" id="coinFilter" onchange="onFilterChange()">
-                <span>Монеты</span>
+
+            <div class="filter-checkboxes">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="packFilter" onchange="onFilterChange()">
+                    <span>Паки</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="coinFilter" onchange="onFilterChange()">
+                    <span>Монеты</span>
+                </label>
             </div>
         </div>
 
-        <!-- Контейнер загрузки со спиннером -->
         <div id="loading" class="loading-container">
             <div class="spinner" id="loadingSpinner"></div>
             <span id="loadingText">Загрузка данных...</span>
@@ -432,6 +543,7 @@
         let searchChar = document.getElementById('searchChar').value.trim().toLowerCase();
         let yFilter = document.getElementById('yearFilter').value;
         let pFilter = document.getElementById('priceFilter').value;
+        let sortMode = document.getElementById('sortFilter').value;
         let onlyPacks = document.getElementById('packFilter').checked;
         let onlyCoins = document.getElementById('coinFilter').checked;
 
@@ -459,6 +571,17 @@
             let matchCoins = onlyCoins ? (Number(item.coins || 0) > 0) : true;
 
             return matchId && matchChar && matchYear && matchPrice && matchPacks && matchCoins;
+        });
+
+        filtered.sort((a, b) => {
+            let priceA = Number(String(a.price || '').replace(/[^0-9.]/g, '')) || 0;
+            let priceB = Number(String(b.price || '').replace(/[^0-9.]/g, '')) || 0;
+
+            if (sortMode === 'price_asc') return priceA - priceB;
+            if (sortMode === 'price_desc') return priceB - priceA;
+            if (sortMode === 'oldest') return 0;
+            if (sortMode === 'newest') return -1;
+            return 0;
         });
 
         let totalPages = Math.ceil(filtered.length / itemsPerPage) || 1;
