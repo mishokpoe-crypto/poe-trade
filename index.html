@@ -639,9 +639,14 @@
         let onlyPacks = document.getElementById('packFilter').checked;
         let onlyCoins = document.getElementById('coinFilter').checked;
 
-        let filtered = allData.filter(item => {
-            const hasOtherFields = ['price', 'character', 'packs', 'coins', 'year', 'lastLaunch', 'screenshots']
-                .some(key => item[key] !== undefined && item[key] !== null && String(item[key]).trim() !== '');
+let filtered = allData.filter(item => {
+    // Не показываем товары без цены
+    if (item.price === undefined || item.price === null || String(item.price).trim() === '') {
+        return false;
+    }
+
+    const hasOtherFields = ['character', 'packs', 'coins', 'year', 'lastLaunch', 'screenshots'] 
+        .some(key => item[key] !== undefined && item[key] !== null && String(item[key]).trim() !== '');
 
             if (!hasOtherFields) return false;
 
