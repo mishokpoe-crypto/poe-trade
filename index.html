@@ -356,6 +356,7 @@
                     <option value="oldest">Сначала старые</option>
                     <option value="price_asc">Сначала дешевле</option>
                     <option value="price_desc">Сначала дороже</option>
+                    <option value="random">Случайно</option>
                 </select>
             </div>
 
@@ -402,6 +403,7 @@
 
 <script>
     let allData = [];
+    let randomOrder = new WeakMap();
     let cart = [];
     let currentPage = 1;
     let currentGame = 'poe1'; 
@@ -497,6 +499,8 @@
             .then(response => response.json())
             .then(data => {
                 allData = Array.isArray(data) ? data : [];
+                randomOrder = new WeakMap();
+                allData.forEach(item => randomOrder.set(item, Math.random()));
                 renderFilters(allData);
                 currentPage = 1;
                 filterData();
@@ -671,6 +675,7 @@ let filtered = allData.filter(item => {
         });
 
         filtered.sort((a, b) => {
+            if (sortMode === 'random') return randomOrder.get(a) - randomOrder.get(b);
             let priceA = Number(String(a.price || '').replace(/[^0-9.]/g, '')) || 0;
             let priceB = Number(String(b.price || '').replace(/[^0-9.]/g, '')) || 0;
 
