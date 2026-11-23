@@ -225,14 +225,12 @@
         .btn-action:hover:not(:disabled) { border-color: var(--gold); color: #fff; background: #1f1711; box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
         .btn-action:disabled { border-color: #221c15; color: #4a4136; background: #060504; cursor: default; }
 
-        /* Кнопка «В корзине»: при наведении превращается в «Убрать из корзины».
-           Сразу после «Купить» (just-added) остаётся «В корзине», пока мышь не уйдёт с кнопки. */
-        .btn-action.in-cart, .btn-action.in-cart.just-added:hover { border-color: #2a2219; color: #6b5d4b; background: #080605; box-shadow: none; white-space: nowrap; }
-        .btn-action.in-cart.just-added { cursor: default; }
+        /* Кнопка «В корзине»: при наведении (и сразу после «Купить») показывает «Убрать из корзины» */
+        .btn-action.in-cart { border-color: #2a2219; color: #6b5d4b; background: #080605; white-space: nowrap; }
         .btn-action.in-cart .remove-label { display: none; }
-        .btn-action.in-cart:not(.just-added):hover, .btn-action.in-cart:not(.just-added):focus-visible { border-color: #8b2e2e; color: #ff7b7b; background: #1a0b0b; box-shadow: 0 0 10px rgba(255, 82, 82, 0.2); }
-        .btn-action.in-cart:not(.just-added):hover .in-cart-label, .btn-action.in-cart:not(.just-added):focus-visible .in-cart-label { display: none; }
-        .btn-action.in-cart:not(.just-added):hover .remove-label, .btn-action.in-cart:not(.just-added):focus-visible .remove-label { display: inline; }
+        .btn-action.in-cart:hover, .btn-action.in-cart:focus-visible { border-color: #8b2e2e; color: #ff7b7b; background: #1a0b0b; box-shadow: 0 0 10px rgba(255, 82, 82, 0.2); }
+        .btn-action.in-cart:hover .in-cart-label, .btn-action.in-cart:focus-visible .in-cart-label { display: none; }
+        .btn-action.in-cart:hover .remove-label, .btn-action.in-cart:focus-visible .remove-label { display: inline; }
 
         .btn-link { 
             flex: 1; 
@@ -414,7 +412,7 @@
     let allData = [];
     let randomOrder = new WeakMap();
     let cart = [];
-    let justAddedId = null;
+    let lastAddClick = { id: null, time: 0 }; // защита от случайного двойного клика по «Купить»
     let currentPage = 1;
     let currentGame = 'poe1'; 
     const itemsPerPage = 18;
@@ -740,7 +738,7 @@ let filtered = allData.filter(item => {
                     <div class="card-info">Последний запуск: <span>${escapeHtml(item.lastLaunch || '—')}</span></div>
                 </div>
                 <div class="card-footer">
-                    <button class="btn-action buy-btn${isInCart ? ' in-cart' : ''}${isInCart && justAddedId === stringId ? ' just-added' : ''}" data-id="${escapeHtml(stringId)}"${isInCart ? ' title="Убрать из корзины"' : ''}>
+                    <button class="btn-action buy-btn${isInCart ? ' in-cart' : ''}" data-id="${escapeHtml(stringId)}"${isInCart ? ' title="Убрать из корзины"' : ''}>
                         ${isInCart ? '<span class="in-cart-label">В корзине</span><span class="remove-label">Убрать из корзины</span>' : 'Купить'}
                     </button>
                     ${item.screenshots ? `<a href="${safeUrl(item.screenshots)}" target="_blank" class="btn-action btn-link">Скрины</a>` : '<button class="btn-action btn-link" disabled style="opacity: 0.4;">Нет скринов</button>'}
@@ -761,15 +759,12 @@ let filtered = allData.filter(item => {
             buyBtn.addEventListener('click', function() {
                 let id = this.getAttribute('data-id');
                 if (!cart.includes(id)) {
-                    justAddedId = id;
+                    lastAddClick = { id: id, time: Date.now() };
                     addToCart(id);
-                } else if (!this.classList.contains('just-added')) {
+                } else if (!(lastAddClick.id === id && Date.now() - lastAddClick.time < 400)) {
+                    // второй клик двойного клика по «Купить» не убирает аккаунт обратно
                     removeFromCart(id);
                 }
-            });
-            buyBtn.addEventListener('mouseleave', function() {
-                this.classList.remove('just-added');
-                if (justAddedId === stringId) justAddedId = null;
             });
 
             grid.appendChild(card);
@@ -788,4 +783,5 @@ let filtered = allData.filter(item => {
 </script>
 </body>
 </html>
+
 
