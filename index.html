@@ -2,8 +2,15 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>POE — Витрина аккаунтов</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#121110">
+    <title>PoE — Витрина аккаунтов</title>
+
+    <!-- Превью ссылки в Telegram и других мессенджерах -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="PoE — Витрина аккаунтов">
+    <meta property="og:description" content="Аккаунты Path of Exile 1 и 2: персонажи, паки, монеты. Покупка через Telegram.">
+
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-SZRFLJDEF1"></script>
     <script>
@@ -14,399 +21,310 @@
       gtag('config', 'G-SZRFLJDEF1');
     </script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@600;700&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #d4af37; --border-color: #3d3122; }
-        
-        body { 
-            background: radial-gradient(circle at 50% 20%, #1f1711 0%, #080605 50%, #020101 100%);
-            color: #d0d0d0; 
-            font-family: 'Open Sans', sans-serif; 
-            margin: 0; 
-            padding: 30px 20px; 
-            min-height: 100vh; 
-            background-attachment: fixed;
-        }
-        
-        .container { max-width: 1300px; margin: 0 auto; }
-        
-        .header-box { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #2d2319; padding-bottom: 15px; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
-        h2 { font-family: 'Cinzel', serif; color: var(--gold); font-size: 28px; font-weight: 700; letter-spacing: 2px; margin: 0; text-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
-        
-        .btn-refresh, .btn-cart { background: linear-gradient(135deg, #1a1510, #0a0806); color: var(--gold); border: 1px solid #524330; padding: 8px 16px; border-radius: 4px; font-family: 'Cinzel', serif; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }
-        .btn-refresh:hover, .btn-cart:hover { border-color: var(--gold); background: #251d16; box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
-        
-        /* Сетка фильтров: 6 ровных колонок */
-        .filters { 
-            display: grid;
-            grid-template-columns: repeat(6, 1fr); 
-            gap: 15px 16px;
-            align-items: end;
-            margin-bottom: 40px; 
-            background: rgba(10, 8, 6, 0.85); 
-            padding: 20px 25px; 
-            border: 1px solid var(--border-color); 
-            border-radius: 6px;
-            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5), 0 5px 15px rgba(0, 0, 0, 0.4);
+        :root {
+            --bg: #121110;
+            --surface: #1a1816;
+            --surface-2: #23201c;
+            --line: #2e2a25;
+            --line-strong: #453e35;
+            --text: #ece5da;
+            --text-2: #a69d90;
+            --text-3: #6f675d;
+            --gold: #d4af37;
+            --gold-hover: #e3c25a;
+            --gold-ink: #1b1505;
+            --danger: #e57373;
+            --danger-bg: #2a1616;
+            --font-ui: 'Golos Text', system-ui, -apple-system, 'Segoe UI', sans-serif;
+            --font-brand: 'Cormorant SC', Georgia, serif;
+            --font-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
         }
 
-        .filter-group { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 6px; 
-            font-family: 'Cinzel', serif; 
-            font-size: 13px; 
-            color: #b8ab96; 
-        }
+        * { box-sizing: border-box; }
+        html { -webkit-text-size-adjust: 100%; }
 
-        .filter-group label {
-            letter-spacing: 0.5px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-            white-space: nowrap;
-        }
-
-        select, input[type="text"] { 
-            background: #050403; 
-            color: #f0e6d2; 
-            border: 1px solid #423525; 
-            padding: 8px 10px; 
-            border-radius: 4px; 
-            font-family: 'Open Sans', sans-serif; 
-            font-size: 13px; 
-            outline: none; 
-            width: 100%;
-            box-sizing: border-box;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        select:focus, input[type="text"]:focus {
-            border-color: var(--gold);
-            box-shadow: 0 0 8px rgba(212, 175, 55, 0.25);
-        }
-
-        /* Компактная верстка чекбоксов друг под другом */
-        .filter-checkboxes {
-            grid-column: auto;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            gap: 6px;
-            height: 38px;
-        }
-
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            font-family: 'Cinzel', serif;
-            font-size: 12px;
-            color: #b8ab96;
-            user-select: none;
-            transition: color 0.2s;
-            white-space: nowrap;
-        }
-
-        .checkbox-label:hover {
-            color: var(--gold);
-        }
-
-        input[type="checkbox"] { 
-            accent-color: var(--gold); 
-            width: 15px; 
-            height: 15px; 
-            cursor: pointer; 
+        body {
             margin: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212, 175, 55, 0.06), transparent 70%);
+            background-attachment: fixed;
+            color: var(--text);
+            font-family: var(--font-ui);
+            font-size: 15px;
+            line-height: 1.45;
         }
 
-        /* Адаптив для средних и маленьких экранов */
-        @media (max-width: 1100px) {
-            .filters {
-                grid-template-columns: repeat(3, 1fr);
-            }
+        .container { max-width: 1240px; margin: 0 auto; padding: 28px 20px 96px; }
+
+        svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+        /* ---------- Шапка ---------- */
+        .header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+        .brand { margin: 0; font-family: var(--font-brand); font-weight: 700; font-size: 32px; line-height: 1.05; letter-spacing: 0.03em; color: var(--gold); }
+        .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+        .segmented { display: inline-flex; padding: 3px; background: var(--surface); border: 1px solid var(--line); border-radius: 9px; }
+        .segmented button { border: 0; background: transparent; color: var(--text-2); font: 600 13px var(--font-ui); padding: 7px 12px; border-radius: 6px; cursor: pointer; }
+        .segmented button:hover { color: var(--text); }
+        .segmented button.active { background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line-strong); }
+
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 38px; padding: 0 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text); font: 600 14px var(--font-ui); text-decoration: none; cursor: pointer; white-space: nowrap; transition: background 0.15s, border-color 0.15s, color 0.15s; }
+        .btn:hover:not(:disabled) { background: var(--surface-2); border-color: var(--line-strong); }
+        .btn:disabled { opacity: 0.45; cursor: default; }
+        .btn-icon { width: 38px; padding: 0; }
+        .cart-count { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: var(--gold); color: var(--gold-ink); font-size: 12px; font-weight: 700; }
+        .cart-count.zero { background: var(--surface-2); color: var(--text-3); }
+
+        /* ---------- Доверие ---------- */
+        .trust { display: flex; flex-wrap: wrap; gap: 8px 24px; padding: 14px 0 22px; color: var(--text-2); font-size: 13.5px; }
+        .trust span { display: inline-flex; align-items: center; gap: 8px; }
+        .trust svg.i { width: 16px; height: 16px; color: var(--gold); }
+        .trust b { color: var(--text); font-weight: 600; }
+        .trust a { color: var(--text); text-decoration: none; border-bottom: 1px solid var(--line-strong); }
+        .trust a:hover { border-color: var(--gold); }
+
+        /* ---------- Фильтры ---------- */
+        .filters { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 1fr) auto; gap: 12px; align-items: end; padding: 16px; margin-bottom: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+        .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+        .field label { font-size: 12px; font-weight: 500; color: var(--text-2); }
+        .f-toggles { display: flex; gap: 8px; }
+
+        input[type="text"], select { width: 100%; height: 38px; padding: 0 12px; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 8px; font: 14px var(--font-ui); outline: none; transition: border-color 0.15s; }
+        input[type="text"]::placeholder { color: var(--text-3); }
+        select { appearance: none; -webkit-appearance: none; padding-right: 32px; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a69d90' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+        input[type="text"]:focus, select:focus { border-color: var(--gold); }
+
+        .toggle { flex: 1; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 38px; padding: 0 10px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; color: var(--text-2); font-size: 13px; font-weight: 500; cursor: pointer; user-select: none; transition: border-color 0.15s, color 0.15s; }
+        .toggle input { margin: 0; width: 15px; height: 15px; accent-color: var(--gold); cursor: pointer; }
+        .toggle:hover { color: var(--text); }
+        .toggle:has(input:checked) { border-color: var(--gold); color: var(--text); }
+
+        @media (max-width: 1050px) {
+            .filters { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+            .f-search { grid-column: span 6; }
+            .f-select { grid-column: span 4; }
+            .f-toggles { grid-column: span 12; }
+        }
+        .filters-toggle { display: none; }
+        @media (max-width: 600px) {
+            .container { padding: 18px 14px 96px; }
+            .brand { font-size: 26px; }
+            .header { gap: 12px; }
+            .f-search { grid-column: span 12; }
+            .f-select { grid-column: span 6; }
+            .f-sort { grid-column: span 12; }
+            .filters { padding: 12px; gap: 10px; }
+            .filters-toggle { display: inline-flex; grid-column: span 12; width: 100%; justify-content: space-between; }
+            .filters-toggle svg.i { transition: transform 0.15s; }
+            .filters.open .filters-toggle svg.i { transform: rotate(180deg); }
+            .filters:not(.open) .f-more { display: none; }
         }
 
-        @media (max-width: 650px) {
-            .filters {
-                grid-template-columns: 1fr;
-            }
-            .filter-checkboxes {
-                flex-direction: row;
-                gap: 20px;
-                height: auto;
-                margin-top: 5px;
-            }
-        }
+        /* ---------- Список ---------- */
+        .results-bar { margin: 0 0 12px; color: var(--text-3); font-size: 13px; }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
 
-        .loading-container { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            color: #7a6e5d; 
-            font-family: 'Cinzel', serif; 
-            font-size: 16px; 
-            padding: 60px 20px; 
-        }
+        .card { display: flex; flex-direction: column; gap: 12px; padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; transition: border-color 0.15s; }
+        .card:hover { border-color: var(--line-strong); }
 
-        .spinner {
-            width: 42px;
-            height: 42px;
-            border: 3px solid #2a2016;
-            border-top: 3px solid var(--gold);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-bottom: 15px;
-            box-shadow: 0 0 12px rgba(212, 175, 55, 0.2);
-        }
+        .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+        .card-id { display: inline-flex; align-items: center; gap: 6px; padding: 2px 0; background: none; border: 0; color: var(--text-2); font: 500 13px var(--font-mono); cursor: pointer; }
+        .card-id svg.i { width: 14px; height: 14px; opacity: 0.55; }
+        .card-id:hover { color: var(--text); }
+        .card-id:hover svg.i { opacity: 1; }
+        .card-price { color: var(--gold); font-size: 22px; font-weight: 700; line-height: 1; white-space: nowrap; }
+        .card-price small { font-size: 15px; font-weight: 600; margin-left: 2px; }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        .card-title { margin: 0; color: var(--text); font-size: 16px; font-weight: 600; line-height: 1.35; overflow-wrap: anywhere; }
+        .card-info { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+        .info-row { display: flex; justify-content: space-between; gap: 12px; color: var(--text-3); }
+        .info-row .v { color: var(--text-2); text-align: right; }
+        .info-row .v.gold { color: var(--gold); font-weight: 700; }
 
-        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
-        
-        .card { 
-            background: linear-gradient(135deg, rgba(16, 13, 10, 0.95), rgba(6, 5, 4, 0.98)); 
-            border: 1px solid #3d3122; 
-            padding: 22px; 
-            border-radius: 4px; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: space-between; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.7); 
-            box-sizing: border-box; 
-            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            border-color: #7a633c;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.8), 0 0 15px rgba(212, 175, 55, 0.15);
-        }
-        
-        .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #241c14; padding-bottom: 10px; margin-bottom: 15px; }
-        .card-id { color: #9c8e7a; font-family: 'Cinzel', serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: color 0.2s; }
-        .card-id:hover { color: var(--gold); }
-        
-        .card-price { 
-            color: var(--gold); 
-            font-family: 'Cinzel', serif; 
-            font-weight: 700; 
-            font-size: 20px; 
-            text-shadow: 0 0 8px rgba(212, 175, 55, 0.4), 0 0 20px rgba(212, 175, 55, 0.2); 
-        }
-        
-        .card-title { font-family: 'Cinzel', serif; color: #e6dcce; font-size: 16px; font-weight: 600; margin-bottom: 15px; }
-        .card-info { font-size: 14px; color: #7a6e5d; margin-bottom: 8px; display: flex; justify-content: space-between; }
-        .card-info b { color: #d4af37; font-weight: bold; }
-        
-        .card-footer { margin-top: 20px; display: flex; gap: 10px; }
-        
-        .btn-action { 
-            padding: 12px; 
-            background: linear-gradient(180deg, #14100c, #0a0705); 
-            border: 1px solid #423525; 
-            color: var(--gold); 
-            cursor: pointer; 
-            font-family: 'Cinzel', serif; 
-            font-weight: 700; 
-            font-size: 14px; 
-            border-radius: 3px; 
-            flex: 1.5; 
-            transition: 0.2s; 
-            text-align: center; 
-            text-decoration: none; 
-            display: inline-flex; 
-            align-items: center; 
-            justify-content: center; 
-            box-sizing: border-box;
-        }
-        .btn-action:hover:not(:disabled) { border-color: var(--gold); color: #fff; background: #1f1711; box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
-        .btn-action:disabled { border-color: #221c15; color: #4a4136; background: #060504; cursor: default; }
+        .badges { display: flex; flex-wrap: wrap; gap: 6px; }
+        .badge { padding: 3px 8px; border-radius: 6px; background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.25); color: var(--gold-hover); font-size: 12px; font-weight: 600; }
 
-        /* Кнопка «В корзине»: при наведении (и сразу после «Купить») показывает «Убрать из корзины» */
-        .btn-action.in-cart { border-color: #2a2219; color: #6b5d4b; background: #080605; white-space: nowrap; }
-        .btn-action.in-cart .remove-label { display: none; }
-        .btn-action.in-cart:hover, .btn-action.in-cart:focus-visible { border-color: #8b2e2e; color: #ff7b7b; background: #1a0b0b; box-shadow: 0 0 10px rgba(255, 82, 82, 0.2); }
-        .btn-action.in-cart:hover .in-cart-label, .btn-action.in-cart:focus-visible .in-cart-label { display: none; }
-        .btn-action.in-cart:hover .remove-label, .btn-action.in-cart:focus-visible .remove-label { display: inline; }
+        .card-actions { display: flex; gap: 8px; margin-top: auto; padding-top: 4px; }
+        .btn-buy { flex: 1; height: 40px; padding: 0 12px; border: 1px solid var(--gold); border-radius: 8px; background: var(--gold); color: var(--gold-ink); font: 700 14px var(--font-ui); cursor: pointer; white-space: nowrap; transition: background 0.15s, border-color 0.15s, color 0.15s; }
+        .btn-buy:hover { background: var(--gold-hover); border-color: var(--gold-hover); }
+        .btn-buy.in-cart { background: var(--surface-2); border-color: var(--line-strong); color: var(--text-2); }
+        .btn-buy.in-cart .remove-label { display: none; }
+        .btn-buy.in-cart:hover, .btn-buy.in-cart:focus-visible { background: var(--danger-bg); border-color: #6b2f2f; color: var(--danger); }
+        .btn-buy.in-cart:hover .in-cart-label, .btn-buy.in-cart:focus-visible .in-cart-label { display: none; }
+        .btn-buy.in-cart:hover .remove-label, .btn-buy.in-cart:focus-visible .remove-label { display: inline; }
+        .card-actions .btn { height: 40px; }
 
-        .btn-link { 
-            flex: 1; 
-            border-color: #2d2319; 
-            color: #8c806f; 
-            background: linear-gradient(180deg, #120e0b, #070504); 
-            font-size: 13px; 
-            text-decoration: none;
-        }
-        .btn-link:hover:not(:disabled) { border-color: #524330; color: #d0d0d0; background: #1a1410; box-shadow: none; }
+        .empty { grid-column: 1 / -1; padding: 48px 20px; text-align: center; color: var(--text-3); }
 
-        .pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 40px; }
-        .page-btn { background: linear-gradient(135deg, #1a1510, #0a0806); color: var(--gold); border: 1px solid #524330; padding: 8px 14px; border-radius: 4px; font-family: 'Cinzel', serif; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; }
-        .page-btn:hover:not(:disabled) { border-color: var(--gold); background: #251d16; box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
-        .page-btn:disabled { border-color: #221c15; color: #4a4136; background: #060504; cursor: default; }
-        .page-info { font-family: 'Cinzel', serif; color: #b8ab96; font-size: 14px; }
+        .pagination { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 28px; }
+        .page-info { color: var(--text-2); font-size: 14px; }
 
-        #cartModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(3px); z-index: 100; }
-        .modal-content { background: #0d0a08; width: 460px; max-width: 90%; margin: 80px auto; padding: 30px; border: 1px solid var(--border-color); color: #d0d0d0; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.9); box-sizing: border-box; }
-        
-        .modal-title { font-size: 20px; margin-top: 0; font-family: 'Cinzel', serif; color: var(--gold); border-bottom: 1px solid #241c14; padding-bottom: 12px; text-shadow: 0 0 8px rgba(212, 175, 55, 0.3); }
-        .modal-list-item { padding: 10px 0; border-bottom: 1px solid #1a1510; display: flex; justify-content: space-between; align-items: center; font-size: 15px; }
-        .modal-item-text { color: #e6dcce; font-family: 'Cinzel', serif; }
-        .modal-item-price { color: var(--gold); font-family: 'Cinzel', serif; font-size: 14px; font-weight: 600; margin-left: 10px; }
-        .modal-del-btn { color: #b85c5c; background: none; border: none; cursor: pointer; font-family: 'Cinzel', serif; font-size: 13px; font-weight: bold; margin-left: 15px; }
-        .modal-del-btn:hover { color: #ff7676; }
-        .modal-empty { color: #9c8e7a; text-align: center; padding: 25px; font-size: 14px; font-family: 'Cinzel', serif; }
+        .loading { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 64px 20px; color: var(--text-2); }
+        .spinner { width: 36px; height: 36px; border: 3px solid var(--line); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .modal-total { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #241c14; font-family: 'Cinzel', serif; font-size: 16px; color: #b8ab96; }
-        .modal-total-price { color: var(--gold); font-weight: 700; font-size: 18px; text-shadow: 0 0 8px rgba(212, 175, 55, 0.3); }
+        /* ---------- Корзина ---------- */
+        .overlay { position: fixed; inset: 0; z-index: 100; display: none; align-items: flex-start; justify-content: center; padding: 10vh 14px 14px; background: rgba(0, 0, 0, 0.6); }
+        .overlay.open { display: flex; }
+        .dialog { display: flex; flex-direction: column; width: 440px; max-width: 100%; max-height: 80vh; padding: 20px; background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: 14px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); }
+        .dialog-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .dialog-head h3 { margin: 0; font-size: 18px; font-weight: 700; }
+        .dialog-head .btn-icon { background: transparent; border-color: transparent; color: var(--text-2); }
+        .dialog-head .btn-icon:hover { background: var(--surface); color: var(--text); }
 
-        #cartList {
-            margin: 15px 0;
-            padding: 0;
-            list-style: none;
-            max-height: 400px;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: #524330 #080605;
-        }
-        #cartList::-webkit-scrollbar { width: 6px; }
-        #cartList::-webkit-scrollbar-track { background: #080605; border-radius: 3px; }
-        #cartList::-webkit-scrollbar-thumb { background: #3d3122; border-radius: 3px; }
-        #cartList::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+        #cartList { flex: 1; margin: 0; padding: 0; list-style: none; overflow-y: auto; }
+        .cart-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+        .cart-item-main { flex: 1; min-width: 0; }
+        .cart-item-id { font: 500 13px var(--font-mono); color: var(--text); }
+        .cart-item-sub { color: var(--text-3); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cart-item-price { color: var(--gold); font-weight: 700; white-space: nowrap; }
+        .cart-item .btn-icon { width: 32px; height: 32px; background: transparent; border-color: transparent; color: var(--text-3); }
+        .cart-item .btn-icon:hover { background: var(--danger-bg); color: var(--danger); }
+        .cart-empty { padding: 28px 0; text-align: center; color: var(--text-3); }
 
-        .modal-action-btn { width: 100%; margin-top: 10px; background: linear-gradient(180deg, #14100c, #0a0705); border: 1px solid #423525; color: var(--gold); padding: 12px; font-family: 'Cinzel', serif; font-weight: 700; font-size: 14px; cursor: pointer; border-radius: 3px; text-align: center; transition: 0.2s; box-sizing: border-box; }
-        .modal-action-btn:hover:not(:disabled) { background: #1f1711; border-color: var(--gold); box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
-        .modal-action-btn:disabled { border-color: #221c15; color: #4a4136; background: #060504; cursor: default; }
+        .cart-total { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 0 4px; color: var(--text-2); }
+        .cart-total b { color: var(--gold); font-size: 20px; }
+        .dialog > * { flex-shrink: 0; }
+        .dialog > #cartList { flex: 1 1 auto; min-height: 0; }
+        .dialog-actions .btn-buy, .dialog-actions .btn { width: 100%; height: 44px; margin-top: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        .dialog-actions .btn-buy:disabled { opacity: 0.45; cursor: default; }
+        .hint { margin: 8px 0 0; color: var(--text-3); font-size: 12.5px; text-align: center; }
 
-        .modal-close-btn { width: 100%; margin-top: 10px; background: linear-gradient(180deg, #14100c, #0a0705); border: 1px solid #423525; color: var(--gold); padding: 14px; font-family: 'Cinzel', serif; font-weight: 700; font-size: 15px; cursor: pointer; border-radius: 3px; text-align: center; transition: 0.2s; box-sizing: border-box; }
-        .modal-close-btn:hover { background: var(--gold); color: #000; box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
+        /* Плашка корзины внизу экрана на телефоне */
+        .cart-bar { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 90; display: none; align-items: center; justify-content: space-between; gap: 12px; height: 54px; padding: 0 18px; border: 0; border-radius: 12px; background: var(--gold); color: var(--gold-ink); font: 700 15px var(--font-ui); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); cursor: pointer; }
+        @media (max-width: 700px) { .cart-bar.show { display: flex; } }
 
-        /* Всплывающее уведомление (Toast) */
-        #toast {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: linear-gradient(135deg, #1a1510, #0a0806);
-            color: var(--gold);
-            border: 1px solid var(--gold);
-            padding: 12px 20px;
-            border-radius: 4px;
-            font-family: 'Cinzel', serif;
-            font-size: 14px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.8), 0 0 10px rgba(212, 175, 55, 0.3);
-            z-index: 200;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
-            transform: translateY(10px);
-        }
-        #toast.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
+        /* ---------- Уведомление ---------- */
+        #toast { position: fixed; right: 24px; bottom: 24px; z-index: 200; display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 28px); padding: 12px 16px; background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: 10px; color: var(--text); font-size: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); opacity: 0; visibility: hidden; transform: translateY(8px); transition: opacity 0.2s, visibility 0.2s, transform 0.2s; }
+        #toast svg.i { color: var(--gold); }
+        #toast.show { opacity: 1; visibility: visible; transform: none; }
+        @media (max-width: 700px) { #toast { left: 14px; right: 14px; bottom: 78px; } }
+
+        @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation-duration: 0s !important; } }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="header-box">
-            <h2 id="storeTitle">POE 1 — ВИТРИНА АККАУНТОВ</h2>
-            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                
-                <!-- Переключатель игр PoE 1 / PoE 2 -->
-                <div style="display: flex; background: #050403; border: 1px solid #423525; border-radius: 4px; padding: 2px;">
-                    <button id="btnPoe1" style="border: none; background: #251d16; cursor: pointer; padding: 6px 12px; color: #fff; border-radius: 3px; font-family: 'Cinzel', serif; font-weight: 600; font-size: 13px;" onclick="switchGame('poe1')">PoE 1</button>
-                    <button id="btnPoe2" style="border: none; background: transparent; cursor: pointer; padding: 6px 12px; color: #aaa; border-radius: 3px; font-family: 'Cinzel', serif; font-weight: 600; font-size: 13px;" onclick="switchGame('poe2')">PoE 2</button>
-                </div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M14.5 21.7a.5.5 0 0 0 .9 0l6.5-19a.5.5 0 0 0-.6-.6l-19 6.5a.5.5 0 0 0 0 .9l7.9 3.2a2 2 0 0 1 1.1 1.1z"/><path d="m21.9 2.1-10.9 10.9"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+    <symbol id="i-cart" viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+</svg>
 
-                <a href="https://t.me/MishokPoE" target="_blank" class="btn-refresh">💬 Telegram</a>
-                <button class="btn-refresh" onclick="loadData()">🔄 Обновить</button>
-                <button class="btn-cart" onclick="toggleCart()">🛒 Корзина (<span id="cartCount">0</span>)</button>
+<div class="container">
+    <header class="header">
+        <h1 class="brand" id="storeTitle">PoE 1 — Витрина аккаунтов</h1>
+        <div class="header-actions">
+            <div class="segmented" role="group" aria-label="Игра">
+                <button id="btnPoe1" class="active" onclick="switchGame('poe1')">PoE 1</button>
+                <button id="btnPoe2" onclick="switchGame('poe2')">PoE 2</button>
             </div>
+            <a class="btn" href="https://t.me/MishokPoE" target="_blank" rel="noopener"><svg class="i"><use href="#i-send"/></svg>Telegram</a>
+            <button class="btn btn-icon" onclick="loadData()" title="Обновить список" aria-label="Обновить список"><svg class="i"><use href="#i-refresh"/></svg></button>
+            <button class="btn" onclick="toggleCart()"><svg class="i"><use href="#i-cart"/></svg>Корзина <span id="cartCount" class="cart-count zero">0</span></button>
         </div>
+    </header>
 
-        <div class="filters">
-            <div class="filter-group">
-                <label for="searchId">Поиск ID:</label>
-                <input type="text" id="searchId" placeholder="Введите ID..." oninput="onFilterChange()">
-            </div>
-            
-            <div class="filter-group">
-                <label for="searchChar">Описание:</label>
-                <input type="text" id="searchChar" placeholder="Лвл / стеш..." oninput="onFilterChange()">
-            </div>
-            
-            <div class="filter-group">
-                <label for="yearFilter">Макс. год:</label>
-                <select id="yearFilter" onchange="onFilterChange()"><option value="all">Любой</option></select>
-            </div>
-            
-            <div class="filter-group">
-                <label for="priceFilter">Диапазон цен:</label>
-                <select id="priceFilter" onchange="onFilterChange()">
-                    <option value="all">Любая</option>
-                    <option value="0-6">До 6$</option>
-                    <option value="8-15">8-15$</option>
-                    <option value="20-30">20-30$</option>
-                    <option value="35-50">35-50$</option>
-                    <option value="60-9999">60$+</option>
-                </select>
-            </div>
+    <div class="trust">
+        <span><svg class="i"><use href="#i-shield"/></svg><span><b>389</b> аккаунтов уже продано</span></span>
+        <span><svg class="i"><use href="#i-send"/></svg><span>Покупка и вопросы — в Telegram <a href="https://t.me/MishokPoE" target="_blank" rel="noopener">@MishokPoE</a></span></span>
+    </div>
 
-            <div class="filter-group">
-                <label for="sortFilter">Сортировка:</label>
-                <select id="sortFilter" onchange="onFilterChange()">
-                    <option value="newest">Сначала новые</option>
-                    <option value="oldest">Сначала старые</option>
-                    <option value="price_asc">Сначала дешевле</option>
-                    <option value="price_desc">Сначала дороже</option>
-                    <option value="random">Случайно</option>
-                </select>
-            </div>
-
-            <div class="filter-checkboxes">
-                <label class="checkbox-label">
-                    <input type="checkbox" id="packFilter" onchange="onFilterChange()">
-                    <span>Паки</span>
-                </label>
-                <label class="checkbox-label">
-                    <input type="checkbox" id="coinFilter" onchange="onFilterChange()">
-                    <span>Монеты</span>
-                </label>
-            </div>
+    <div class="filters" id="filters">
+        <div class="field f-search">
+            <label for="searchId">Поиск по ID</label>
+            <input type="text" id="searchId" placeholder="Например, ny20w3" oninput="onFilterChange()" autocomplete="off">
         </div>
-
-        <div id="loading" class="loading-container">
-            <div class="spinner" id="loadingSpinner"></div>
-            <span id="loadingText">Загрузка данных...</span>
+        <button class="btn filters-toggle" type="button" onclick="document.getElementById('filters').classList.toggle('open')">
+            <span>Фильтры и сортировка</span><svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="field f-search f-more">
+            <label for="searchChar">Персонажи</label>
+            <input type="text" id="searchChar" placeholder="Лвл, класс, стеш…" oninput="onFilterChange()" autocomplete="off">
         </div>
-
-        <div id="cardsGrid" class="cards-grid" style="display: none;"></div>
-        
-        <div id="paginationContainer" class="pagination" style="display: none;">
-            <button class="page-btn" id="prevBtn" onclick="changePage(-1)">Назад</button>
-            <span class="page-info" id="pageInfo">Страница 1 из 1</span>
-            <button class="page-btn" id="nextBtn" onclick="changePage(1)">Вперед</button>
+        <div class="field f-select f-more">
+            <label for="yearFilter">Год регистрации до</label>
+            <select id="yearFilter" onchange="onFilterChange()"><option value="all">Любой</option></select>
+        </div>
+        <div class="field f-select f-more">
+            <label for="priceFilter">Цена</label>
+            <select id="priceFilter" onchange="onFilterChange()">
+                <option value="all">Любая</option>
+                <option value="0-6">До 6 $</option>
+                <option value="8-15">8–15 $</option>
+                <option value="20-30">20–30 $</option>
+                <option value="35-50">35–50 $</option>
+                <option value="60-9999">От 60 $</option>
+            </select>
+        </div>
+        <div class="field f-select f-sort f-more">
+            <label for="sortFilter">Сортировка</label>
+            <select id="sortFilter" onchange="onFilterChange()">
+                <option value="newest">Сначала новые</option>
+                <option value="oldest">Сначала старые</option>
+                <option value="price_asc">Сначала дешевле</option>
+                <option value="price_desc">Сначала дороже</option>
+                <option value="random">Случайно</option>
+            </select>
+        </div>
+        <div class="f-toggles f-more">
+            <label class="toggle"><input type="checkbox" id="packFilter" onchange="onFilterChange()">С паками</label>
+            <label class="toggle"><input type="checkbox" id="coinFilter" onchange="onFilterChange()">С монетами</label>
         </div>
     </div>
 
-    <div id="cartModal">
-        <div class="modal-content">
-            <h3 class="modal-title">Корзина</h3>
-            <ul id="cartList"></ul>
-            <div id="cartTotalContainer" class="modal-total" style="display: none;">
-                <span>Итого:</span>
-                <span id="cartTotalPrice" class="modal-total-price">0</span>
-            </div>
-            <button class="modal-action-btn" id="copyCartBtn" onclick="copyCartIds()" disabled>📋 Скопировать ID</button>
-            <button class="modal-close-btn" onclick="toggleCart()">Закрыть</button>
-        </div>
+    <div id="loading" class="loading">
+        <div class="spinner" id="loadingSpinner"></div>
+        <span id="loadingText">Загрузка…</span>
     </div>
 
-    <div id="toast">Уведомление</div>
+    <div id="resultsBar" class="results-bar" style="display: none;"></div>
+    <div id="cardsGrid" class="cards-grid" style="display: none;"></div>
+
+    <div id="paginationContainer" class="pagination" style="display: none;">
+        <button class="btn" id="prevBtn" onclick="changePage(-1)">Назад</button>
+        <span class="page-info" id="pageInfo">Страница 1 из 1</span>
+        <button class="btn" id="nextBtn" onclick="changePage(1)">Вперёд</button>
+    </div>
+</div>
+
+<div id="cartModal" class="overlay" onclick="if (event.target === this) closeCart()">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
+        <div class="dialog-head">
+            <h3 id="cartTitle">Корзина</h3>
+            <button class="btn btn-icon" onclick="closeCart()" aria-label="Закрыть"><svg class="i"><use href="#i-x"/></svg></button>
+        </div>
+        <ul id="cartList"></ul>
+        <div id="cartTotalContainer" class="cart-total" style="display: none;">
+            <span>Итого</span>
+            <b id="cartTotalPrice">0 $</b>
+        </div>
+        <div class="dialog-actions">
+            <button class="btn-buy" id="telegramBtn" onclick="orderInTelegram()" disabled><svg class="i"><use href="#i-send"/></svg>Написать в Telegram</button>
+            <button class="btn" id="copyCartBtn" onclick="copyCartIds()" disabled><svg class="i"><use href="#i-copy"/></svg>Скопировать ID</button>
+            <p class="hint" id="cartHint">Список ID с ценами скопируется, останется вставить его в чат.</p>
+        </div>
+    </div>
+</div>
+
+<button id="cartBar" class="cart-bar" onclick="openCart()">
+    <span id="cartBarText">Корзина</span>
+    <span style="display: inline-flex; align-items: center; gap: 8px;"><span id="cartBarTotal"></span><svg class="i"><use href="#i-arrow"/></svg></span>
+</button>
+
+<div id="toast" role="status" aria-live="polite"><svg class="i"><use href="#i-check"/></svg><span id="toastText"></span></div>
 
 <script>
     let allData = [];
@@ -414,8 +332,9 @@
     let cart = [];
     let lastAddClick = { id: null, time: 0 }; // защита от случайного двойного клика по «Купить»
     let currentPage = 1;
-    let currentGame = 'poe1'; 
+    let currentGame = 'poe1';
     const itemsPerPage = 18;
+    const TELEGRAM_URL = 'https://t.me/MishokPoE';
 
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxpUYXZRhJVuX6p-_jDacqnYQQ8Cp0GTUcO6kglbyQ_Omdq4EGezCnUWeIc__zLwiwdFw/exec';
 
@@ -424,51 +343,37 @@
         loadData();
     };
 
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCart(); });
+
+    const icon = (name) => `<svg class="i"><use href="#i-${name}"/></svg>`;
+
+    let toastTimer = null;
     function showToast(message) {
         let toast = document.getElementById('toast');
-        toast.innerText = message;
+        document.getElementById('toastText').textContent = message;
         toast.classList.add('show');
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, 2500);
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
     }
 
     function saveCartToStorage() {
-        try {
-            localStorage.setItem(`poe_cart_${currentGame}`, JSON.stringify(cart));
-        } catch(e) {}
+        try { localStorage.setItem(`poe_cart_${currentGame}`, JSON.stringify(cart)); } catch (e) {}
     }
 
     function loadCartFromStorage() {
         try {
             let saved = localStorage.getItem(`poe_cart_${currentGame}`);
-            if (saved) {
-                cart = JSON.parse(saved);
-                document.getElementById('cartCount').innerText = cart.length;
-            }
-        } catch(e) {}
+            cart = saved ? JSON.parse(saved) : [];
+        } catch (e) { cart = []; }
+        refreshCartUI();
     }
 
     function switchGame(game) {
         if (currentGame === game) return;
         currentGame = game;
-
-        if (game === 'poe1') {
-            document.getElementById('btnPoe1').style.background = '#251d16';
-            document.getElementById('btnPoe1').style.color = '#fff';
-            document.getElementById('btnPoe2').style.background = 'transparent';
-            document.getElementById('btnPoe2').style.color = '#aaa';
-            document.getElementById('storeTitle').innerText = "POE 1 — ВИТРИНА АККАУНТОВ";
-        } else {
-            document.getElementById('btnPoe2').style.background = '#251d16';
-            document.getElementById('btnPoe2').style.color = '#fff';
-            document.getElementById('btnPoe1').style.background = 'transparent';
-            document.getElementById('btnPoe1').style.color = '#aaa';
-            document.getElementById('storeTitle').innerText = "POE 2 — ВИТРИНА АККАУНТОВ";
-        }
-
-        cart = [];
-        document.getElementById('cartCount').innerText = 0;
+        document.getElementById('btnPoe1').classList.toggle('active', game === 'poe1');
+        document.getElementById('btnPoe2').classList.toggle('active', game === 'poe2');
+        document.getElementById('storeTitle').textContent = (game === 'poe1' ? 'PoE 1' : 'PoE 2') + ' — Витрина аккаунтов';
         loadCartFromStorage();
         loadData();
     }
@@ -482,15 +387,88 @@
             .replace(/'/g, '&#39;');
     }
 
-    function safeUrl(url) {
+    function httpUrl(url) {
         try {
-            const u = new URL(url, window.location.href);
-            return (u.protocol === 'http:' || u.protocol === 'https:') ? u.href : '#';
-        } catch { 
-            return '#'; 
-        }
+            const u = new URL(String(url || '').trim());
+            return (u.protocol === 'http:' || u.protocol === 'https:') ? u.href : null;
+        } catch { return null; }
     }
 
+    function priceNumber(price) {
+        let n = Number(String(price ?? '').replace(/[^0-9.]/g, ''));
+        return isNaN(n) ? 0 : n;
+    }
+
+    function plural(n, one, few, many) {
+        const a = Math.abs(n) % 100, b = a % 10;
+        if (a > 10 && a < 20) return many;
+        if (b > 1 && b < 5) return few;
+        if (b === 1) return one;
+        return many;
+    }
+
+    // ---------- Даты ----------
+    // «Последний запуск» приходит на разных языках (как его показывает Steam).
+    // Приводим всё к виду 07.09.2017, а если года нет — 07.09.
+    const MONTHS = (() => {
+        const m = {};
+        const add = (n, words) => words.split(' ').forEach(w => m[w] = n);
+        add(1, 'jan janv jän ene gen oca sty янв січ มค');
+        add(2, 'feb febr févr fév fev şub lut фев лют กพ');
+        add(3, 'mar mars mär mrz márc мар бер มีค');
+        add(4, 'apr avr abr nis ápr kwi апр кві เมย');
+        add(5, 'may mai mag maj máj мая май тра พค');
+        add(6, 'jun juin giu haz jún cze июн чер มิย');
+        add(7, 'jul juil lug tem júl lip июл лип กค');
+        add(8, 'aug août ago ağu sie авг сер สค');
+        add(9, 'sep sept set eyl szept wrz сен вер กย');
+        add(10, 'oct okt out ott eki paź окт жов ตค');
+        add(11, 'nov kas lis ноя лис พย');
+        add(12, 'dec déc dez dic ara gru дек гру ธค');
+        return m;
+    })();
+
+    function monthFromWord(word) {
+        return MONTHS[word] || MONTHS[word.slice(0, 4)] || MONTHS[word.slice(0, 3)] || null;
+    }
+
+    function formatLastLaunch(raw) {
+        let s = String(raw ?? '').trim();
+        if (!s || /не найден/i.test(s)) return null;
+        if (/^(today|yesterday|сегодня|вчера|сьогодні|вчора|hoy|ayer|hoje|ontem|heute|gestern|aujourd|hier|bugün|dün|oggi|ieri|dzisiaj|wczoraj)/i.test(s)) return 'недавно';
+
+        let d, m, y, r;
+        if ((r = s.match(/(\d{4})\s*[年년]\s*(\d{1,2})\s*[月월]\s*(\d{1,2})/))) { y = +r[1]; m = +r[2]; d = +r[3]; }
+        else if ((r = s.match(/(\d{1,2})\s*[月월]\s*(\d{1,2})/))) { m = +r[1]; d = +r[2]; }
+        else if ((r = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) { y = +r[1]; m = +r[2]; d = +r[3]; }
+        else if ((r = s.match(/^(\d{1,2})[.\/](\d{1,2})[.\/](\d{4})/))) { d = +r[1]; m = +r[2]; y = +r[3]; }
+        else {
+            const words = s.replace(/\d+/g, ' ').split(/[\s,]+/).map(w => w.replace(/\./g, '').toLowerCase()).filter(Boolean);
+            for (const w of words) { const mm = monthFromWord(w); if (mm) { m = mm; break; } }
+            for (const n of (s.match(/\d+/g) || [])) {
+                if (n.length === 4) y = +n;
+                else if (d === undefined && n.length <= 2) d = +n;
+            }
+        }
+        if (y > 2400) y -= 543; // тайский календарь
+        if (!m || !d || m > 12 || d > 31) return s; // не разобрали — показываем как есть
+        const p = n => String(n).padStart(2, '0');
+        return y ? `${p(d)}.${p(m)}.${y}` : `${p(d)}.${p(m)}`;
+    }
+
+    function formatRegYear(raw) {
+        let s = String(raw ?? '').trim();
+        let n = Number(s);
+        if (!s || isNaN(n)) return null;
+        return n < 100 ? 2000 + n : n;
+    }
+
+    function hasAmount(v) {
+        let n = Number(String(v ?? '').trim());
+        return !isNaN(n) && n > 0 ? n : 0;
+    }
+
+    // ---------- Загрузка ----------
     function loadData() {
         let loadingBox = document.getElementById('loading');
         let spinner = document.getElementById('loadingSpinner');
@@ -498,9 +476,10 @@
 
         loadingBox.style.display = 'flex';
         spinner.style.display = 'block';
-        loadingText.innerText = `Загрузка данных (${currentGame === 'poe1' ? 'PoE 1' : 'PoE 2'})...`;
+        loadingText.textContent = `Загрузка аккаунтов ${currentGame === 'poe1' ? 'PoE 1' : 'PoE 2'}…`;
 
         document.getElementById('cardsGrid').style.display = 'none';
+        document.getElementById('resultsBar').style.display = 'none';
         document.getElementById('paginationContainer').style.display = 'none';
 
         fetch(`${WEB_APP_URL}?action=getData&game=${currentGame}`)
@@ -512,126 +491,156 @@
                 renderFilters(allData);
                 currentPage = 1;
                 filterData();
+                refreshCartUI();
                 loadingBox.style.display = 'none';
                 document.getElementById('cardsGrid').style.display = 'grid';
+                document.getElementById('resultsBar').style.display = 'block';
             })
             .catch(error => {
                 console.error('Ошибка:', error);
                 loadingBox.style.display = 'flex';
                 spinner.style.display = 'none';
-                loadingText.innerText = "Ошибка загрузки данных";
+                loadingText.textContent = 'Не удалось загрузить список. Нажмите «Обновить».';
             });
     }
 
     function renderFilters(data) {
         let select = document.getElementById('yearFilter');
         let currentValue = select.value;
-        
+
         let years = [...new Set(
-            data.map(item => String(item.year || '').trim()).filter(y => y !== '')
+            data.map(item => String(item.year || '').trim()).filter(y => y !== '' && !isNaN(Number(y)))
         )].sort((a, b) => Number(b) - Number(a));
-        
+
         let optionsHtml = '<option value="all">Любой</option>';
         years.forEach(y => {
-            optionsHtml += `<option value="${escapeHtml(y)}">${escapeHtml(y)}</option>`;
+            optionsHtml += `<option value="${escapeHtml(y)}">${escapeHtml(formatRegYear(y))}</option>`;
         });
         select.innerHTML = optionsHtml;
-        
-        if (Array.from(select.options).some(opt => opt.value === currentValue)) {
-            select.value = currentValue;
-        } else {
-            select.value = 'all';
+        select.value = Array.from(select.options).some(opt => opt.value === currentValue) ? currentValue : 'all';
+    }
+
+    // ---------- Корзина ----------
+    function findItem(id) {
+        return allData.find(i => String(i.id) === String(id));
+    }
+
+    function cartTotal() {
+        return cart.reduce((sum, id) => { let item = findItem(id); return sum + (item ? priceNumber(item.price) : 0); }, 0);
+    }
+
+    function refreshCartUI() {
+        let count = cart.length;
+        let badge = document.getElementById('cartCount');
+        badge.textContent = count;
+        badge.classList.toggle('zero', count === 0);
+
+        let total = cartTotal();
+        document.getElementById('cartBar').classList.toggle('show', count > 0);
+        document.getElementById('cartBarText').textContent = `Корзина · ${count} ${plural(count, 'аккаунт', 'аккаунта', 'аккаунтов')}`;
+        document.getElementById('cartBarTotal').textContent = total > 0 ? `${total} $` : '';
+    }
+
+    function renderCart() {
+        let list = document.getElementById('cartList');
+        let totalContainer = document.getElementById('cartTotalContainer');
+        let empty = cart.length === 0;
+
+        document.getElementById('copyCartBtn').disabled = empty;
+        document.getElementById('telegramBtn').disabled = empty;
+        document.getElementById('cartHint').style.display = empty ? 'none' : 'block';
+
+        if (empty) {
+            list.innerHTML = '<li class="cart-empty">Корзина пуста</li>';
+            totalContainer.style.display = 'none';
+            return;
         }
+
+        list.innerHTML = cart.map(id => {
+            let item = findItem(id);
+            let price = item && String(item.price ?? '').trim() !== '' ? `${item.price} $` : '—';
+            let sub = item && item.character ? item.character : '';
+            return `
+                <li class="cart-item">
+                    <div class="cart-item-main">
+                        <div class="cart-item-id">#${escapeHtml(id)}</div>
+                        ${sub ? `<div class="cart-item-sub">${escapeHtml(sub)}</div>` : ''}
+                    </div>
+                    <span class="cart-item-price">${escapeHtml(price)}</span>
+                    <button class="btn btn-icon" data-del-id="${escapeHtml(id)}" title="Убрать из корзины" aria-label="Убрать из корзины">${icon('trash')}</button>
+                </li>`;
+        }).join('');
+
+        let total = cartTotal();
+        document.getElementById('cartTotalPrice').textContent = total > 0 ? `${total} $` : '—';
+        totalContainer.style.display = 'flex';
+
+        list.querySelectorAll('[data-del-id]').forEach(btn => {
+            btn.addEventListener('click', function() { removeFromCart(this.getAttribute('data-del-id')); });
+        });
+    }
+
+    function openCart() {
+        renderCart();
+        document.getElementById('cartModal').classList.add('open');
+    }
+
+    function closeCart() {
+        document.getElementById('cartModal').classList.remove('open');
     }
 
     function toggleCart() {
-        let modal = document.getElementById('cartModal');
-        modal.style.display = (modal.style.display === 'block') ? 'none' : 'block';
-        
-        let list = document.getElementById('cartList');
-        let copyBtn = document.getElementById('copyCartBtn');
-        let totalContainer = document.getElementById('cartTotalContainer');
-        let totalPriceEl = document.getElementById('cartTotalPrice');
+        if (document.getElementById('cartModal').classList.contains('open')) closeCart();
+        else openCart();
+    }
 
-        if (cart.length === 0) {
-            list.innerHTML = '<li class="modal-empty">Корзина пуста</li>';
-            totalContainer.style.display = 'none';
-            copyBtn.disabled = true;
-        } else {
-            let totalPrice = 0;
-
-            list.innerHTML = cart.map(id => {
-                let item = allData.find(i => String(i.id) === String(id));
-                let itemPriceStr = item && item.price !== "" && item.price != null ? String(item.price) + ' $' : '—';
-                
-                if (item && item.price !== "" && item.price != null) {
-                    let cleanNum = Number(String(item.price).replace(/[^0-9.]/g, ''));
-                    if (!isNaN(cleanNum)) totalPrice += cleanNum;
-                }
-
-                return `
-                    <li class="modal-list-item">
-                        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                            <span class="modal-item-text">Аккаунт #${escapeHtml(id)}</span>
-                            <div style="display: flex; align-items: center;">
-                                <span class="modal-item-price">${escapeHtml(itemPriceStr)}</span>
-                                <button class="modal-del-btn" data-del-id="${escapeHtml(id)}">[Удалить]</button>
-                            </div>
-                        </div>
-                    </li>
-                `;
-            }).join('');
-
-            totalPriceEl.innerText = totalPrice > 0 ? totalPrice + ' $' : '—';
-            totalContainer.style.display = 'flex';
-            copyBtn.disabled = false;
-
-            list.querySelectorAll('.modal-del-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    removeFromCart(this.getAttribute('data-del-id'));
-                });
-            });
-        }
+    function cartText() {
+        let lines = cart.map(id => {
+            let item = findItem(id);
+            return item && String(item.price ?? '').trim() !== '' ? `#${id} — ${item.price} $` : `#${id}`;
+        });
+        let total = cartTotal();
+        let game = currentGame === 'poe1' ? 'PoE 1' : 'PoE 2';
+        return `Здравствуйте! Хочу купить аккаунты ${game}:\n${lines.join('\n')}` + (total > 0 ? `\nИтого: ${total} $` : '');
     }
 
     function copyCartIds() {
         if (cart.length === 0) return;
-        let textToCopy = cart.join('\n');
-        navigator.clipboard.writeText(textToCopy).then(() => {
-            let copyBtn = document.getElementById('copyCartBtn');
-            let originalText = copyBtn.innerText;
-            copyBtn.innerText = '✅ Скопировано!';
-            showToast('ID аккаунтов скопированы в буфер!');
-            setTimeout(() => {
-                copyBtn.innerText = originalText;
-            }, 2000);
-        }).catch(err => {
-            console.error('Ошибка копирования: ', err);
-        });
+        navigator.clipboard.writeText(cart.join('\n'))
+            .then(() => showToast('ID аккаунтов скопированы'))
+            .catch(err => console.error('Ошибка копирования: ', err));
+    }
+
+    function orderInTelegram() {
+        if (cart.length === 0) return;
+        navigator.clipboard.writeText(cartText())
+            .then(() => showToast('Список скопирован — вставьте его в чат'))
+            .catch(() => {});
+        window.open(TELEGRAM_URL, '_blank', 'noopener');
     }
 
     function addToCart(id) {
         let stringId = String(id);
         if (!cart.includes(stringId)) {
             cart.push(stringId);
-            document.getElementById('cartCount').innerText = cart.length;
             saveCartToStorage();
+            refreshCartUI();
             filterData();
-            showToast(`Аккаунт #${stringId} добавлен в корзину`);
+            showToast(`Аккаунт #${stringId} в корзине`);
         }
     }
 
     function removeFromCart(id) {
         let stringId = String(id);
         cart = cart.filter(item => item !== stringId);
-        document.getElementById('cartCount').innerText = cart.length;
         saveCartToStorage();
+        refreshCartUI();
         filterData();
-        toggleCart(); 
-        toggleCart(); 
+        if (document.getElementById('cartModal').classList.contains('open')) renderCart();
         showToast(`Аккаунт #${stringId} убран из корзины`);
     }
 
+    // ---------- Фильтры и список ----------
     function onFilterChange() {
         currentPage = 1;
         filterData();
@@ -652,29 +661,25 @@
         let onlyPacks = document.getElementById('packFilter').checked;
         let onlyCoins = document.getElementById('coinFilter').checked;
 
-let filtered = allData.filter(item => {
-    // Не показываем товары без цены
-    if (item.price === undefined || item.price === null || String(item.price).trim() === '') {
-        return false;
-    }
+        let filtered = allData.filter(item => {
+            // Не показываем товары без цены
+            if (item.price === undefined || item.price === null || String(item.price).trim() === '') return false;
 
-    const hasOtherFields = ['character', 'packs', 'coins', 'year', 'lastLaunch', 'screenshots'] 
-        .some(key => item[key] !== undefined && item[key] !== null && String(item[key]).trim() !== '');
-
+            const hasOtherFields = ['character', 'packs', 'coins', 'year', 'lastLaunch', 'screenshots']
+                .some(key => item[key] !== undefined && item[key] !== null && String(item[key]).trim() !== '');
             if (!hasOtherFields) return false;
 
-            let cleanPriceStr = String(item.price || '').replace(/[^0-9.]/g, '');
-            let itemPrice = Number(cleanPriceStr);
+            let itemPrice = priceNumber(item.price);
             let itemYearStr = String(item.year || '').trim();
 
             let matchId = String(item.id || '').toLowerCase().includes(searchId);
             let matchChar = String(item.character || '').toLowerCase().includes(searchChar);
             let matchYear = (yFilter === 'all') || (itemYearStr !== '' && Number(itemYearStr) <= Number(yFilter));
-            
+
             let matchPrice = true;
             if (pFilter !== 'all') {
                 let [min, max] = pFilter.split('-').map(Number);
-                matchPrice = (!isNaN(itemPrice) && itemPrice >= min && itemPrice <= max);
+                matchPrice = itemPrice >= min && itemPrice <= max;
             }
 
             let matchPacks = onlyPacks ? (Number(item.packs || 0) > 0) : true;
@@ -685,12 +690,8 @@ let filtered = allData.filter(item => {
 
         filtered.sort((a, b) => {
             if (sortMode === 'random') return randomOrder.get(a) - randomOrder.get(b);
-            let priceA = Number(String(a.price || '').replace(/[^0-9.]/g, '')) || 0;
-            let priceB = Number(String(b.price || '').replace(/[^0-9.]/g, '')) || 0;
-
-            if (sortMode === 'price_asc') return priceA - priceB;
-            if (sortMode === 'price_desc') return priceB - priceA;
-            if (sortMode === 'oldest') return 0;
+            if (sortMode === 'price_asc') return priceNumber(a.price) - priceNumber(b.price);
+            if (sortMode === 'price_desc') return priceNumber(b.price) - priceNumber(a.price);
             if (sortMode === 'newest') return -1;
             return 0;
         });
@@ -699,18 +700,18 @@ let filtered = allData.filter(item => {
         if (currentPage > totalPages) currentPage = totalPages;
 
         let start = (currentPage - 1) * itemsPerPage;
-        let paginatedData = filtered.slice(start, start + itemsPerPage);
-
-        renderCards(paginatedData, filtered.length);
+        renderCards(filtered.slice(start, start + itemsPerPage), filtered.length);
     }
 
     function renderCards(data, totalFilteredCount) {
         let grid = document.getElementById('cardsGrid');
         let paginationContainer = document.getElementById('paginationContainer');
+        let n = totalFilteredCount;
+        document.getElementById('resultsBar').textContent = `Найдено ${n.toLocaleString('ru-RU')} ${plural(n, 'аккаунт', 'аккаунта', 'аккаунтов')}`;
         grid.innerHTML = '';
 
         if (data.length === 0) {
-            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #7a6e5d; padding: 40px; font-family: Cinzel, serif; font-size: 14px;">Аккаунты не найдены</div>';
+            grid.innerHTML = '<div class="empty">Ничего не нашлось. Попробуйте ослабить фильтры.</div>';
             paginationContainer.style.display = 'none';
             return;
         }
@@ -719,44 +720,41 @@ let filtered = allData.filter(item => {
             let stringId = String(item.id);
             let isInCart = cart.includes(stringId);
 
+            let regYear = formatRegYear(item.year) || '—';
+            let lastSeen = formatLastLaunch(item.lastLaunch) || '—';
+            let amount = v => { let s = String(v ?? '').trim(); return s === '' ? '?' : s; };
+            let shots = httpUrl(item.screenshots);
+
             let card = document.createElement('div');
             card.className = 'card';
-            
-            let packsVal = (item.packs !== "" && item.packs !== null && item.packs !== undefined) ? item.packs : '?';
-            let coinsVal = (item.coins !== "" && item.coins !== null && item.coins !== undefined) ? item.coins : '?';
-
             card.innerHTML = `
-                <div>
-                    <div class="card-header">
-                        <span class="card-id" title="Кликните, чтобы скопировать ID">#${escapeHtml(item.id)}</span>
-                        <span class="card-price">${escapeHtml(item.price !== "" && item.price !== null ? item.price + ' $' : '—')}</span>
-                    </div>
-                    <div class="card-title"></div>
-                    <div class="card-info">Паки: <b>${escapeHtml(packsVal)}</b></div>
-                    <div class="card-info">Монеты: <b>${escapeHtml(coinsVal)}</b></div>
-                    <div class="card-info">Год регистрации: <span>${escapeHtml(item.year || '—')}</span></div>
-                    <div class="card-info">Последний запуск: <span>${escapeHtml(item.lastLaunch || '—')}</span></div>
+                <div class="card-top">
+                    <button class="card-id" title="Скопировать ID">#${escapeHtml(stringId)}${icon('copy')}</button>
+                    <span class="card-price">${escapeHtml(item.price)}<small> $</small></span>
                 </div>
-                <div class="card-footer">
-                    <button class="btn-action buy-btn${isInCart ? ' in-cart' : ''}" data-id="${escapeHtml(stringId)}"${isInCart ? ' title="Убрать из корзины"' : ''}>
+                <h3 class="card-title">${escapeHtml(item.character || 'Без описания')}</h3>
+                <div class="card-info">
+                    <div class="info-row"><span>Паки:</span><span class="v gold">${escapeHtml(amount(item.packs))}</span></div>
+                    <div class="info-row"><span>Монеты:</span><span class="v gold">${escapeHtml(amount(item.coins))}</span></div>
+                    <div class="info-row"><span>Год регистрации:</span><span class="v">${escapeHtml(regYear)}</span></div>
+                    <div class="info-row"><span>Последний запуск:</span><span class="v">${escapeHtml(lastSeen)}</span></div>
+                </div>
+                <div class="card-actions">
+                    <button class="btn-buy buy-btn${isInCart ? ' in-cart' : ''}" data-id="${escapeHtml(stringId)}"${isInCart ? ' title="Убрать из корзины"' : ''}>
                         ${isInCart ? '<span class="in-cart-label">В корзине</span><span class="remove-label">Убрать из корзины</span>' : 'Купить'}
                     </button>
-                    ${item.screenshots ? `<a href="${safeUrl(item.screenshots)}" target="_blank" class="btn-action btn-link">Скрины</a>` : '<button class="btn-action btn-link" disabled style="opacity: 0.4;">Нет скринов</button>'}
+                    ${shots
+                        ? `<a class="btn" href="${escapeHtml(shots)}" target="_blank" rel="noopener">${icon('image')}Скрины</a>`
+                        : `<button class="btn" disabled>${icon('image')}Нет скринов</button>`}
                 </div>
             `;
 
-            card.querySelector('.card-title').textContent = item.character || '';
-
-            // Клик по ID для быстрого копирования конкретного аккаунта
             card.querySelector('.card-id').addEventListener('click', function() {
-                navigator.clipboard.writeText(stringId).then(() => {
-                    showToast(`ID #${stringId} скопирован!`);
-                });
+                navigator.clipboard.writeText(stringId).then(() => showToast(`ID #${stringId} скопирован`));
             });
 
             // «Купить» кладёт в корзину, «В корзине» (при наведении «Убрать из корзины») убирает
-            let buyBtn = card.querySelector('.buy-btn');
-            buyBtn.addEventListener('click', function() {
+            card.querySelector('.buy-btn').addEventListener('click', function() {
                 let id = this.getAttribute('data-id');
                 if (!cart.includes(id)) {
                     lastAddClick = { id: id, time: Date.now() };
@@ -773,7 +771,7 @@ let filtered = allData.filter(item => {
         let totalPages = Math.ceil(totalFilteredCount / itemsPerPage) || 1;
         if (totalPages > 1) {
             paginationContainer.style.display = 'flex';
-            document.getElementById('pageInfo').innerText = `Страница ${currentPage} из ${totalPages}`;
+            document.getElementById('pageInfo').textContent = `Страница ${currentPage} из ${totalPages}`;
             document.getElementById('prevBtn').disabled = (currentPage === 1);
             document.getElementById('nextBtn').disabled = (currentPage === totalPages);
         } else {
@@ -783,5 +781,3 @@ let filtered = allData.filter(item => {
 </script>
 </body>
 </html>
-
-
